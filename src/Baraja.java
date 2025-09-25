@@ -8,6 +8,7 @@ public class Baraja {
                 cartas.add(new Carta(v,m));
             }
         }
+        barajar();
     }
     public void barajar(){
         if (cartas.isEmpty()||cartas.size()==1) return;
@@ -20,7 +21,7 @@ public class Baraja {
             }
     }
     public Carta repartir(){
-        return cartas.remove(0);
+        return cartas.remove(cartas.size()-1);
     }
     public void imprimirBaraja(){
            for (Carta c:cartas){

@@ -1,12 +1,13 @@
+import java.util.ArrayList;
+import java.util.List;
 public class Jugador {
     private final String nombre;
     private int fichas;
-    private Carta[] mano;
+    private List<Carta> mano=new ArrayList<>();
     boolean enRonda=true;
-    public Jugador(String nombre, int fichas, Carta[] mano){
+    public Jugador(String nombre, int fichas){
         this.nombre=nombre;
         this.fichas=fichas;
-        this.mano=mano;
     }
     void salir(){
         enRonda=false;
@@ -18,5 +19,14 @@ public class Jugador {
         }else {
             fichas-=apuesta;
         }return true;
+    }
+    void recibir(Carta carta){
+        if (mano.size()<2){
+            mano.add(carta);
+        }
+    }
+    void imprimir(){
+        mano.get(0).imprimirCarta();
+        mano.get(1).imprimirCarta();
     }
 }

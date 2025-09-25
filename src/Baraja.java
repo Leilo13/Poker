@@ -23,10 +23,10 @@ public class Baraja {
     public Carta repartir(){
         return cartas.remove(cartas.size()-1);
     }
-    public void imprimirBaraja(){
+    /*public void imprimirBaraja(){
            for (Carta c:cartas){
                 c.imprimirCarta();
             }
-    }
+    }*/
 }
 

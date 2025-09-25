@@ -26,7 +26,11 @@ public class Jugador {
         }
     }
     void imprimir(){
-        mano.get(0).imprimirCarta();
-        mano.get(1).imprimirCarta();
+        for (Carta c:mano){
+            c.imprimirCarta();
+        }
+    }
+    public String getNombre() {
+        return nombre;
     }
 }

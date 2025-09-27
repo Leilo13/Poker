@@ -10,7 +10,7 @@ public class Baraja {
         }
         barajar();
     }
-    public void barajar(){
+    private void barajar(){
         if (cartas.isEmpty()||cartas.size()==1) return;
         int n= cartas.size();
             for (int i = n - 1; i > 0; i--) {

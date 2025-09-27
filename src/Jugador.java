@@ -25,7 +25,7 @@ public class Jugador {
             mano.add(carta);
         }
     }
-    void imprimir(){
+    void imprimirMano(){
         for (Carta c:mano){
             c.imprimirCarta();
         }

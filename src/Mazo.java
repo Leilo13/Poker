@@ -13,7 +13,7 @@ public enum Mazo {
     public String getSimbolo() {
         return simbolo;
     }
-    public static Mazo darCodigo(char c) {
+    /*public static Mazo darCodigo(char c) {
         switch (Character.toUpperCase(c)) {
             case 'C': return TREBOLES;
             case 'H': return CORAZONES;
@@ -21,5 +21,5 @@ public enum Mazo {
             case 'D': return DIAMANTES;
             default: throw new IllegalArgumentException("Valor de mazo invalido "+c);
         }
-    }
+    }*/
 }

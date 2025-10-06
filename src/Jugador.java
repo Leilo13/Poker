@@ -12,14 +12,14 @@ public class Jugador {
     void salir(){
         enRonda=false;
     }
-    boolean apostar(int apuesta){
+   /* boolean apostar(int apuesta){
         if (apuesta>fichas){
             System.out.println("Apuesta inválida");
             return false;
         }else {
             fichas-=apuesta;
         }return true;
-    }
+    }*/
     void recibir(Carta carta){
         if (mano.size()<2){
             mano.add(carta);

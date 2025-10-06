@@ -5,10 +5,10 @@ public class Mesa {
     Scanner sc=new Scanner(System.in);
     private Ronda ronda;
     List<Jugador> jugadores=new ArrayList<>();
-    Baraja bar;
+    Baraja baraja;
     public Mesa(){
         //Algo con la ronda
-        bar=new Baraja();
+        baraja =new Baraja();
         crearJugadores();
         repartoInicial();
         ronda=Ronda.PREFLOP;
@@ -29,7 +29,7 @@ public class Mesa {
     private void repartoInicial(){
         for (Jugador j:jugadores){
             for (int i=0;i<2;i++){
-                j.recibir(bar.repartir());
+                j.recibir(baraja.repartir());
             }
         }
     }

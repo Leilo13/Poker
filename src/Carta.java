@@ -5,6 +5,8 @@ public class Carta {
         this.valor=valor;
         this.mazo=mazo;
     }
+    public Valor getValor() {return valor;}
+    public Mazo getMazo() {return mazo;}
     public void imprimirCarta() {
         System.out.println(valor.getEtiqueta()+ mazo.getSimbolo());
     }

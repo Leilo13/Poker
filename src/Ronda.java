@@ -5,12 +5,11 @@ public enum Ronda {
     RIVER,
     SHOWDOWN;
     public Ronda siguiente(){
-        switch(this){
-            case PREFLOP:return FLOP;
-            case FLOP:return TURN;
-            case TURN:return RIVER;
-            case RIVER:return SHOWDOWN;
-            default:return SHOWDOWN;
-        }
+        return switch (this) {
+            case PREFLOP -> FLOP;
+            case FLOP -> TURN;
+            case TURN -> RIVER;
+            default -> SHOWDOWN;//Devuelve SHOWDOWN también si está en RIVER
+        };
     }
 }

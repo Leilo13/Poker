@@ -20,6 +20,10 @@ public class Jugador {
             fichas-=apuesta;
         }return true;
     }*/
+    public List<Carta> getMano() {
+        return mano;
+    }
+
     void recibir(Carta carta){
         if (mano.size()<2){
             mano.add(carta);

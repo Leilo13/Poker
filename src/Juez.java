@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 public class Juez {
@@ -47,7 +46,7 @@ public class Juez {
             int cmp=Integer.compare(da.get(i),db.get(i));
             if (cmp!=0) return cmp;
         }
-        return Integer.compare(da.size(), db.size());
+        return Integer.compare(da.size(), db.size());//Esto NUNCA pasa, pero por si acaso
     }
     //Método para comparar una mano de exactamente 5 cartas y devolver su ResultadoMano
     private ResultadoMano evaluar5(List<Carta> mano5){
@@ -65,7 +64,7 @@ public class Juez {
 
         valores.sort(Comparator.reverseOrder());
         boolean esColor=esColor(conteoPalo);
-        Integer topEsccalera=valorEscalera(valores, conteoValor);//Devuelve la mayor carta de la escalera o null
+        Integer topEscalera=valorEscalera(valores, conteoValor);//Devuelve la mayor carta de la escalera o null
 
         //Método para jugadas de cartas repetidas
         int cuatroIguales=-1, tresIguales=-1;
@@ -77,10 +76,10 @@ public class Juez {
         }
 
         //Método para diferentes tipos de Flor
-        if (esColor&&topEsccalera!=null){
-            boolean esImperial=(topEsccalera==14); //Si estoy aquí adentro ya sé que tiene color corrido, y si su mejor carta es el as, es una flor imperial
+        if (esColor&&topEscalera!=null){
+            boolean esImperial=(topEscalera==14); //Si estoy aquí adentro ya sé que tiene color corrido, y si su mejor carta es el as, es una flor imperial
             if (esImperial) return new ResultadoMano(TipoJugada.FLOR_IMPERIAL, List.of(14));
-            return new ResultadoMano(TipoJugada.FLOR, List.of(topEsccalera));
+            return new ResultadoMano(TipoJugada.FLOR, List.of(topEscalera));
         }
 
         if (cuatroIguales!=-1){ //Tiene Póker
@@ -96,11 +95,11 @@ public class Juez {
             return new ResultadoMano(TipoJugada.COLOR, new ArrayList<>(valores));
         }
 
-        if (topEsccalera!=null){//Tiene escalera, pero no flor
-            return new ResultadoMano(TipoJugada.ESCALERA, List.of(topEsccalera));
+        if (topEscalera!=null){//Tiene escalera, pero no flor
+            return new ResultadoMano(TipoJugada.ESCALERA, List.of(topEscalera));
         }
 
-        if (tresIguales!=1){//Tiene tercia pero no par
+        if (tresIguales!=-1){//Tiene tercia pero no par
             List<Integer> ks=kickers(valores, List.of(tresIguales),2);
             List<Integer> d=new ArrayList<>();
             d.add(tresIguales); d.addAll(ks);
@@ -133,7 +132,7 @@ public class Juez {
         }
     }
     private boolean esColor(int[] conteoPalo){
-        for (int count:conteoPalo) if(count==5) return true;
+        for (int count:conteoPalo) if (count == 5) return true;
         return false;
     }
     private Integer valorEscalera(List<Integer> valoresDesc, int[] conteoValor) {

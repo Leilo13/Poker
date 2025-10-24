@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -32,8 +31,7 @@ public class Mesa {
         switch (ronda){
             case FLOP:
                 for (int i=0;i<3;i++){
-                    comunitarias.add(baraja.repartir())
-;                }
+                    comunitarias.add(baraja.repartir());                }
                 break;
             case TURN:
                 comunitarias.add(baraja.repartir());

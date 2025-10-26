@@ -1,10 +1,8 @@
 public enum Mazo {
-    TREBOLES('C', "♣"), CORAZONES('H', "♥"),
-    PICAS('S', "♠"), DIAMANTES('D', "♦");
-    private final char codigo;
+    TREBOLES( "♣"), CORAZONES("♥"),
+    PICAS( "♠"), DIAMANTES("♦");
     private final String simbolo;
-    Mazo(char codigo, String simbolo){
-        this.codigo=codigo;
+    Mazo(String simbolo){
         this.simbolo=simbolo;
     }
     public String getSimbolo() {

@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 public class Juez {
+
     public ResultadoMano evaluarMejorMano(List<Carta> privadas, List<Carta> comunitarias){
         List<Carta> todas=new ArrayList<>();
         todas.addAll(privadas);
@@ -16,6 +17,7 @@ public class Juez {
         }
         return mejor;
     }
+
     //Método para generar todas las combinaciones de 5 cartas usando una lista
     private List<List<Carta>> combinar5(List<Carta> cartas){
         List<List<Carta>> res=new ArrayList<>();
@@ -35,6 +37,7 @@ public class Juez {
                         }
         return res;
     }
+
     //Comparar 2 resultados. >0 es un mejor resultado, <0 es uno peor y 0 es el mismo valor
     public int compararResultados(ResultadoMano a, ResultadoMano b){
         int cmpTipo=Integer.compare(a.getTipo().ordinal(),b.getTipo().ordinal());
@@ -48,7 +51,9 @@ public class Juez {
         }
         return Integer.compare(da.size(), db.size());//Esto NUNCA pasa, pero por si acaso
     }
+
     //Método para comparar una mano de exactamente 5 cartas y devolver su ResultadoMano
+
     private ResultadoMano evaluar5(List<Carta> mano5){
         int[] conteoValor=new int[15];
         int[] conteoPalo=new int[4];
@@ -78,50 +83,51 @@ public class Juez {
         //Método para diferentes tipos de Flor
         if (esColor&&topEscalera!=null){
             boolean esImperial=(topEscalera==14); //Si estoy aquí adentro ya sé que tiene color corrido, y si su mejor carta es el as, es una flor imperial
-            if (esImperial) return new ResultadoMano(TipoJugada.FLOR_IMPERIAL, List.of(14));
-            return new ResultadoMano(TipoJugada.FLOR, List.of(topEscalera));
+            if (esImperial) return new ResultadoMano(TipoJugada.FLOR_IMPERIAL, List.of(14), mano5);
+            return new ResultadoMano(TipoJugada.FLOR, List.of(topEscalera), mano5);
         }
 
         if (cuatroIguales!=-1){ //Tiene Póker
             int kicker=primerKicker(valores, List.of(cuatroIguales));
-            return new ResultadoMano(TipoJugada.POKER, List.of(cuatroIguales, kicker));
+            return new ResultadoMano(TipoJugada.POKER, List.of(cuatroIguales, kicker), mano5);
         }
 
         if (tresIguales!=-1&&!pares.isEmpty()){//Tiene Full
-            return new ResultadoMano(TipoJugada.FULL,List.of(tresIguales, pares.get(0)));
+            return new ResultadoMano(TipoJugada.FULL,List.of(tresIguales, pares.get(0)), mano5);
         }
 
         if (esColor){//Es color, duh
-            return new ResultadoMano(TipoJugada.COLOR, new ArrayList<>(valores));
+            return new ResultadoMano(TipoJugada.COLOR, new ArrayList<>(valores), mano5);
         }
 
         if (topEscalera!=null){//Tiene escalera, pero no flor
-            return new ResultadoMano(TipoJugada.ESCALERA, List.of(topEscalera));
+            return new ResultadoMano(TipoJugada.ESCALERA, List.of(topEscalera), mano5);
         }
 
         if (tresIguales!=-1){//Tiene tercia pero no par
             List<Integer> ks=kickers(valores, List.of(tresIguales),2);
             List<Integer> d=new ArrayList<>();
             d.add(tresIguales); d.addAll(ks);
-            return new ResultadoMano(TipoJugada.TERCIA, d);
+            return new ResultadoMano(TipoJugada.TERCIA, d, mano5);
         }
 
         if (pares.size()>=2){//Tiene dos pares
             pares.sort(Comparator.reverseOrder());
             int k=primerKicker(valores, List.of(pares.get(0), pares.get(1)));
-            return new ResultadoMano(TipoJugada.DOS_PARES,List.of(pares.get(0), pares.get(1),k));
+            return new ResultadoMano(TipoJugada.DOS_PARES,List.of(pares.get(0), pares.get(1),k), mano5);
         }
 
         if (pares.size()==1) {//Tiene solo un par
             List<Integer> ks=kickers(valores, List.of(pares.get(0)),3);
             List<Integer> d=new ArrayList<>();
             d.add(pares.get(0)); d.addAll(ks);
-            return new ResultadoMano(TipoJugada.PAR, d);
+            return new ResultadoMano(TipoJugada.PAR, d, mano5);
         }
 
         //Si llegaste hasta acá tienes carta alta y de cabrones deberías dejar de jugar
-        return new ResultadoMano(TipoJugada.CARTA_ALTA, new ArrayList<>(valores));
+        return new ResultadoMano(TipoJugada.CARTA_ALTA, new ArrayList<>(valores), mano5);
     }
+
     private int mapPalo(Mazo m){
         return switch (m) {
             case TREBOLES -> 0;
@@ -131,10 +137,12 @@ public class Juez {
             default -> -1;
         };
     }
+
     private boolean esColor(int[] conteoPalo){
         for (int count:conteoPalo) if (count == 5) return true;
         return false;
     }
+
     private Integer valorEscalera(List<Integer> valoresDesc, int[] conteoValor) {
         //Necesitamos manejar A como 14 y como 0, le damos prioridad al 14 por ser el mejor juego
         List<Integer> uniq = new ArrayList<>();
@@ -159,12 +167,14 @@ public class Juez {
         if (a && dos && tres && cuatro && cinco) return 5;
         return null;
     }
+
     private int primerKicker(List<Integer> valoresDesc, List<Integer> excluidos){
         for(int v:valoresDesc){
             if(!excluidos.contains(v)) return v;
         }
         return 0;
     }
+
     private List<Integer> kickers(List<Integer> valoresDesc, List<Integer> excluidos, int cuantos){
         List<Integer> ks=new ArrayList<>();
         for(int v:valoresDesc){

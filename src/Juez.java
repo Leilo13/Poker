@@ -123,13 +123,13 @@ public class Juez {
         return new ResultadoMano(TipoJugada.CARTA_ALTA, new ArrayList<>(valores));
     }
     private int mapPalo(Mazo m){
-        switch (m){
-            case TREBOLES: return 0;
-            case CORAZONES: return 1;
-            case PICAS: return 2;
-            case DIAMANTES: return 3;
-            default: return -1;
-        }
+        return switch (m) {
+            case TREBOLES -> 0;
+            case CORAZONES -> 1;
+            case PICAS -> 2;
+            case DIAMANTES -> 3;
+            default -> -1;
+        };
     }
     private boolean esColor(int[] conteoPalo){
         for (int count:conteoPalo) if (count == 5) return true;

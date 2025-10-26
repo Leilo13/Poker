@@ -25,4 +25,3 @@ public class Baraja {
         return cartas.remove(cartas.size()-1);
     }
 }
-

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -7,12 +8,13 @@ public class Mesa {
     private Ronda ronda;
     private final List<Jugador> jugadores = new ArrayList<>();
     private Baraja baraja;
-    private int pozo, apuestaActual;
+    private int apuestaActual;
     private int dealerIndex = 0;
     private final int smallBlind = 10;
     private final int bigBlind = 20;
     private final Juez juez = new Juez();
     private final List<Carta> comunitarias = new ArrayList<>();
+    private final List<Pozo> pozos = new ArrayList<>();
 
     public Mesa() {
         baraja = new Baraja();
@@ -32,36 +34,62 @@ public class Mesa {
         int sb = smallBlindPlayer.pagarBlind(smallBlind);
         int bb = bigBlindPlayer.pagarBlind(bigBlind);
 
-        pozo += (sb + bb);
         apuestaActual = Math.max(sb,bb);
 
         System.out.println(smallBlindPlayer.getNombre() + " paga la ciega pequeña: " + sb);
         System.out.println(bigBlindPlayer.getNombre() + " paga la ciega grande: " + bb);
     }
 
+    private void construirPozos() {
+        pozos.clear();
+
+        List<Jugador> activos = new ArrayList<>();
+        for (Jugador j : jugadores){
+            if (j.isEnRonda() && j.getApuestaEnRonda() > 0)
+                activos.add(j);
+        }
+
+        //Sort acomoda de menor a mayor
+        activos.sort(Comparator.comparingInt(Jugador::getApuestaEnRonda));
+
+        int acumuladoPrevio = 0;
+        while (!activos.isEmpty()){
+            int nivel = activos.get(0).getApuestaEnRonda();
+            int contribucion = nivel - acumuladoPrevio;
+            List<Jugador> participantes = new ArrayList<>(activos);
+            int totalPozo = contribucion * participantes.size();
+            pozos.add(new Pozo(totalPozo, participantes));
+            acumuladoPrevio = nivel;
+            activos.removeIf(j->j.getApuestaEnRonda() == nivel);
+        }
+    }
+
     public void showdown() {
         if (ronda != Ronda.SHOWDOWN) return;
-        ResultadoMano mejor = null;
-        List<Jugador> ganadores=new ArrayList<>();
 
-        for (Jugador j : jugadores) {
-            ResultadoMano r = juez.evaluarMejorMano(j.getMano(), comunitarias);
-            if (mejor == null || juez.compararResultados(r, mejor) > 0) {
-                ganadores.clear();
-                ganadores.add(j);
-                mejor=r;
-            } else if (juez.compararResultados(r,mejor) == 0) {
-                ganadores.add(j);
+        construirPozos();
 
+        for (Pozo p : pozos) {
+            ResultadoMano mejor = null;
+            List<Jugador> ganadores = new ArrayList<>();
+
+            for (Jugador j : jugadores) {
+                ResultadoMano r = juez.evaluarMejorMano(j.getMano(), comunitarias);
+                if (mejor == null || juez.compararResultados(r, mejor) > 0) {
+                    ganadores.clear();
+                    ganadores.add(j);
+                    mejor = r;
+                } else if (juez.compararResultados(r, mejor) == 0) {
+                    ganadores.add(j);
+                }
+            }
+            int premio = p.getCantidad() / ganadores.size();
+            for (Jugador g : ganadores) {
+                g.ganarFichas(premio);
+                System.out.println("Ganador del: " + p + " -> " + g.getNombre() + " con " + mejor);
             }
         }
-
-        int premio=pozo/ ganadores.size();
-        for (Jugador g: ganadores) {
-            g.ganarFichas(premio);
-            System.out.println("Ganador: " + g.getNombre() + " con " + mejor);
-        }
-        pozo=0;
+        pozos.clear();
         dealerIndex = (dealerIndex + 1) % jugadores.size();
     }
 
@@ -101,11 +129,10 @@ public class Mesa {
         }
     }
 
-    public void imprimirMesaHibrida(Jugador jugadorEnTurno) {
-        System.out.println("=== Ronda: " + ronda + " ===\nPozo: " + pozo + "\n----------------------------");
+    public void imprimirMesa(Jugador jugadorEnTurno) {
+        System.out.println("=== Ronda: " + ronda + " ===" + "\nApuesta actual: " + apuestaActual + "\n----------------------------");
         for (Jugador j : jugadores) {
             System.out.print(j.getNombre() + " (fichas: " + j.getFichas() + ", apuesta actual: " + j.getApuestaEnRonda() + (j.isEnRonda() ? "" : " - RETIRADO") + ") ");
-
             if (j.equals(jugadorEnTurno)) {
                 // Mostrar la mano del jugador en turno
                 System.out.print("Mano: ");
@@ -126,22 +153,6 @@ public class Mesa {
         System.out.println();
     }
 
-
-    /*public void imprimirMesa() {
-        System.out.println("=== Ronda: " + ronda + " ===\nPozo: " + pozo + "\n----------------------------");
-        for (Jugador j : jugadores) {
-            System.out.println(j.getNombre() + " (fichas: " + j.getFichas()  + ", apuesta actual: " + j.getApuestaEnRonda() + ")");
-            j.imprimirMano();
-        }
-        if (!comunitarias.isEmpty()) {
-            System.out.print("Cartas comunitarias: ");
-            for (Carta c : comunitarias) {
-                System.out.print(c + " ");
-            }
-            System.out.println();
-        }
-    }*/
-
     public void rondaDeApuestas() {
         boolean todosIgualados = true;
         int startIndex = (dealerIndex + 3) % jugadores.size();
@@ -149,17 +160,15 @@ public class Mesa {
             for (int i = 0; i < jugadores.size(); i++) {
                 Jugador j=jugadores.get((startIndex+i) % jugadores.size());
                 if (!j.isEnRonda()) continue;
-
                 boolean invalido;
                 do {
                     invalido = false;
-                    imprimirMesaHibrida(j);
+                    imprimirMesa(j);
                     System.out.println(j.getNombre() + ", tu movimiento:\n1->Igualar\n2->Subir\n3->All-in\n4->Retirarse");
                     int eleccion = Integer.parseInt(sc.nextLine());
                     switch (eleccion) {
                         case 1 -> {//Igualar
                             int cantidad = j.call(apuestaActual);
-                            pozo += cantidad;
                         }
                         case 2 -> {//Subir
                             System.out.println("¿A cuánto subes la apuesta? (mínimo " + (apuestaActual + 1) + ")");
@@ -167,12 +176,11 @@ public class Mesa {
                             int diferencia = j.raise(nuevaApuesta, apuestaActual);
                             if (diferencia != -1) {
                                 apuestaActual = j.getApuestaEnRonda();
-                                pozo += diferencia;
                             } else {
                                 invalido = true;
                             }
                         }
-                        case 3 -> pozo += j.allIn();
+                        case 3 -> j.allIn();
                         case 4 -> j.fold();
                         default -> {
                             System.out.println("Opción no válida, prueba otra vez");
@@ -181,9 +189,7 @@ public class Mesa {
                     }
                 } while (invalido);
             }
-
             jugadores.removeIf(jugador -> !jugador.isEnRonda());
-
             todosIgualados = true;
             for (Jugador j : jugadores) {
                 if (j.isEnRonda() && j.getApuestaEnRonda() < apuestaActual) {
@@ -192,6 +198,7 @@ public class Mesa {
                 }
             }
         } while (!todosIgualados && jugadores.size() > 1);
+        construirPozos();
     }
 
     public void prepararNuevaRonda(){
@@ -211,6 +218,6 @@ public class Mesa {
         asignarCiegas();
         repartoInicial();
         ronda = Ronda.PREFLOP;
-        pozo=0;
+        pozos.clear();
     }
 }

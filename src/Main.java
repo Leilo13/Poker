@@ -1,37 +1,18 @@
-import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        Mesa mesa = new Mesa();//Preflop
-
-        boolean seguirJugando = true;
-        while (seguirJugando) {//Preflop
-            mesa.rondaDeApuestas();
-
-            mesa.avanzarRonda();//Flop
-            mesa.prepararNuevaRonda();
-            mesa.rondaDeApuestas();
-
-            mesa.avanzarRonda();//Turn
-            mesa.prepararNuevaRonda();
-            mesa.rondaDeApuestas();
-
-            mesa.avanzarRonda();//River
-            mesa.prepararNuevaRonda();
-            mesa.rondaDeApuestas();
-
-            mesa.avanzarRonda();//Showdown
-            mesa.prepararNuevaRonda();
-            mesa.showdown();
-
-            System.out.println("¿Jugar otra mano? (s/n)");
-            String respuesta = sc.nextLine().trim().toLowerCase();
-            if (respuesta.equals("s")) {
-                mesa.nuevaMano();
-            } else {
-                seguirJugando = false;
+        Mesa mesa = new Mesa();
+        while (!mesa.partidaTerminada()) {
+            while (mesa.getRonda() != Ronda.SHOWDOWN && !mesa.partidaTerminada()) {
+                mesa.imprimirDebug();
+                mesa.rondaDeApuestas();
+                if (mesa.partidaTerminada()) break;
+                mesa.avanzarRonda();
             }
+            if (!mesa.partidaTerminada() && mesa.getRonda() == Ronda.SHOWDOWN) {
+                mesa.avanzarRonda();
+            }
+            mesa.nuevaMano();
         }
-        System.out.println("¡Gracias por jugar!");
+        System.out.println("¡Ganador final: " + mesa.getGanadorFinal() + "!");
     }
 }

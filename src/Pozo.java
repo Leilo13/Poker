@@ -15,8 +15,20 @@ public class Pozo {
 
     public void agregar(int fichas) { cantidad += fichas;}
 
+    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+
     @Override
     public String toString() {
-        return "Pozo: " + cantidad + " fichas, participantes: " + participantes.stream().map(Jugador::getNombre).toList();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Pozo[")
+                .append(cantidad)
+                .append(", participantes=");
+        for (int i = 0; i < participantes.size(); i++) {
+            sb.append(participantes.get(i).getNombre());
+            if (i < participantes.size() - 1) sb.append(",");
+        }
+        sb.append("]");
+        return sb.toString();
     }
+
 }

@@ -1,4 +1,4 @@
-public enum TipoJugada {
+public enum RankingMano {
     CARTA_ALTA,
     PAR,
     DOS_PARES,

@@ -15,7 +15,14 @@ public class Carta {
 
     @Override
     public String toString(){
-        return "[" + valor.getEtiqueta() + mazo.getSimbolo() + "]";
+        String simbolo = mazo.getSimbolo();
+        String color;
+        if (simbolo.equals("♥") || simbolo.equals("♦")){
+            color = "\u001B[31m";
+        } else {
+            color = "\u001B[37m";
+        }
+        return color + "[" + valor.getEtiqueta() + mazo.getSimbolo() + "]" + "\u001B[0m";
     }
 
     /*@Override

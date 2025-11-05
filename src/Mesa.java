@@ -1,6 +1,5 @@
 import java.util.*;
 import java.util.stream.Collectors;
-
 public class Mesa {
     private int apuestaActual;
     private int dealerIndex = 0;
@@ -23,8 +22,14 @@ public class Mesa {
     } //YA ESTÁ
 
     private void asignarCiegas(){
-        int sbIndex = (dealerIndex + 1) % jugadores.size();
-        int bbIndex = (dealerIndex + 2) % jugadores.size();
+        int sbIndex, bbIndex;
+        if (jugadores.size() == 2) {
+            sbIndex = dealerIndex;
+            bbIndex =(dealerIndex + 1) % jugadores.size();
+        } else {
+            sbIndex = (dealerIndex +1) % jugadores.size();
+            bbIndex = (dealerIndex + 2) % jugadores.size();
+        }
         Jugador smallBlindPlayer = jugadores.get(sbIndex);
         Jugador bigBlindPlayer = jugadores.get(bbIndex);
         int sb = smallBlindPlayer.pagarBlind(smallBlind);
@@ -69,6 +74,7 @@ public class Mesa {
     public void showdown() {
         if (ronda != Ronda.SHOWDOWN) return;
         construirPozos();
+        if (pozos.isEmpty()) return;
         System.out.println("\n=== SHOWDOWN ===");
         //imprimirMesa(null, true);
         for (Pozo p : pozos) {
@@ -88,9 +94,11 @@ public class Mesa {
             for (Jugador g : ganadores) {
                 g.ganarFichas(premio);
                 System.out.println("Ganador del: " + p + " -> " + g.getNombre() + " con " + mejor);
+                System.out.println(g.getNombre() + " " + g.getFichas());
             }
         }
         pozos.clear();
+        jugadores.removeIf(j -> j.getFichas() <= 0);
     } //YA ESTÁ
 
     private void repartirComunitarias() {
@@ -104,14 +112,18 @@ public class Mesa {
     } //YA ESTÁ
 
     public void avanzarRonda() {
+        if (ronda == Ronda.SHOWDOWN) {
+            return;
+        }
         ronda = ronda.siguiente();
         apuestaActual = 0;
         for (Jugador j : jugadores) {
-            if (j.getFichas() > 0) {
+            if (j.isEnRonda()) {
                 j.setApuestaEnRonda(0);
             }
         }
         repartirComunitarias();
+        imprimirDebug();
     } //YA ESTÁ
 
     private void crearJugadores() {
@@ -142,9 +154,9 @@ public class Mesa {
     } //YA ESTÁ
 
     private void repartoInicial() {
-        for (Jugador j : jugadores) {
+       for (Jugador j : jugadores) {
             for (int i = 0; i < 2; i++) j.recibir(baraja.repartir());
-        }
+       }
     } //YA ESTÁ
 
     public void imprimirMesa(Jugador jugadorEnTurno, boolean showdown) {
@@ -175,14 +187,26 @@ public class Mesa {
     } //EN REVISIÓN
 
     public void rondaDeApuestas() {
-        boolean todosIgualados = true;
-        int startIndex = (dealerIndex + 3) % jugadores.size();
+        int startIndex;
+        if (jugadores.size() == 2) {
+            if (ronda == Ronda.PREFLOP) {
+                startIndex = dealerIndex;
+            } else {
+                startIndex = (dealerIndex + 1) % jugadores.size();
+            }
+        } else {
+            startIndex = (dealerIndex + 3) % jugadores.size();
+        }
+        Map<Jugador, Boolean> actuo = new HashMap<>();
+        jugadores.stream().filter(Jugador::isEnRonda).forEach(j -> actuo.put(j, false));
+        boolean huboApuesta = (apuestaActual > 0);
+        int ultimoAgresorIndex = -1;
+        outer:
         do {
             for (int i = 0; i < jugadores.size(); i++) {
                 Jugador j = jugadores.get((startIndex + i) % jugadores.size());
                 if (!j.isEnRonda() || j.isAllIn()) continue;
                 boolean invalido;
-                //imprimirMesa(j, false);
                 do {
                     invalido = false;
                     List<Integer> opcionesDisponibles = new ArrayList<>();
@@ -190,18 +214,20 @@ public class Mesa {
                     if (apuestaActual == 0) {
                         System.out.println("1 -> Check");
                         opcionesDisponibles.add(1);
-                        int minimoApuesta = 1;
-                        System.out.println("2 -> Apostar (mínimo " + minimoApuesta + ")");
-                        opcionesDisponibles.add(2);
                         if (j.getFichas() > 0) {
+                            System.out.println("2 -> Apostar (mínimo 1)");
+                            opcionesDisponibles.add(2);
                             System.out.println("3 -> All-in (" + j .getFichas() + ")");
                             opcionesDisponibles.add(3);
                         }
                         System.out.println("4 -> Retirarse");
                         opcionesDisponibles.add(4);
                     } else {
-                        if (j.getFichas() + j.getApuestaEnRonda() >= apuestaActual) {
-                            int cantidad = apuestaActual - j.getApuestaEnRonda();
+                        int diff = apuestaActual - j.getApuestaEnRonda();
+                        if (diff == 0) {
+                            System.out.println("1 -> Check");
+                            opcionesDisponibles.add(1);
+                        } else if (diff > 0 && diff <= j.getFichas()){
                             System.out.println("1 -> Igualar (" + (apuestaActual - j.getApuestaEnRonda() + ")"));
                             opcionesDisponibles.add(1);
                         }
@@ -231,96 +257,88 @@ public class Mesa {
                     }
                     if (apuestaActual == 0) {
                         switch (eleccion) {
-                            case 1 -> {}
+                            case 1 -> actuo.put(j, true);
                             case 2 -> {
-                                int minimoApuesta = 1;
-                                boolean subidaValida = false;
-                                while (!subidaValida) {
-                                    System.out.println("¿Cuánto apuestas? (mínimo " + minimoApuesta + ")");
-                                    try {
-                                        int apuesta = Integer.parseInt(sc.nextLine());
-                                        if (apuesta < minimoApuesta || apuesta > j.getFichas()) {
-                                            System.out.println("Apuesta inválida, intenta de nuevo.");
-                                            continue;
-                                        }
-                                        j.raise(apuesta, apuestaActual);
-                                        apuestaActual = apuesta;
-                                        subidaValida = true;
-                                    } catch (NumberFormatException e) {
-                                        System.out.println("Entrada inválida, escribe un número válido");
-                                    }
+                                int apuesta = pedirCantidad(j, 1, j.getFichas());
+                                j.raise(apuesta, apuestaActual);
+                                apuestaActual = apuesta;
+                                huboApuesta = true;
+                                ultimoAgresorIndex = (startIndex + i) % jugadores.size();
+                                actuo.put(j, true);
+                            }
+                            case 3 -> {
+                                j.allIn();
+                                if (j.getApuestaEnRonda() > apuestaActual) {
+                                    apuestaActual = j.getApuestaEnRonda();
+                                    huboApuesta = true;
+                                    ultimoAgresorIndex = (startIndex + i) % jugadores.size();
+                                    actuo.put(j, true);
                                 }
                             }
-                            case 3 -> j.allIn();
-                            case 4 -> j.fold();
+                            case 4 -> {
+                                j.fold();
+                                actuo.put(j, true);
+                            }
                         }
                     } else {
                         switch (eleccion) {
-                            case 1 -> j.call(apuestaActual);
+                            case 1 -> {
+                                j.call(apuestaActual);
+                                actuo.put(j, true);
+                            }
                             case 2 -> {
-                                boolean subidaValida = false;
-                                while (!subidaValida) {
-                                    System.out.println("¿A cuánto subes la apuesta? (mínimo " + (apuestaActual + 1) + ")");
-                                    try {
-                                        int nuevaApuesta = Integer.parseInt(sc.nextLine());
-                                        int diferencia = j.raise(nuevaApuesta, apuestaActual);
-                                        if (diferencia != -1) {
-                                            apuestaActual = j.getApuestaEnRonda();
-                                            subidaValida = true;
-                                        } else {
-                                            System.out.println("Apuesta inválida, intenta de nuevo.");
-                                        }
-                                    } catch (NumberFormatException e) {
-                                        System.out.println("Entrada inválida, escribe un número válido");
-                                    }
+                                int apuesta = pedirCantidad(j, 1, j.getFichas());
+                                j.raise(apuesta, apuestaActual);
+                                apuestaActual = apuesta;
+                                huboApuesta = true;
+                                ultimoAgresorIndex = (startIndex + i) % jugadores.size();
+                                actuo.put(j, true);
+                            }
+                            case 3 -> {
+                                j.allIn();
+                                if (j.getApuestaEnRonda() > apuestaActual) {
+                                    apuestaActual = j.getApuestaEnRonda();
+                                    ultimoAgresorIndex = (startIndex + i) % jugadores.size();
+                                    actuo.put(j, true);
                                 }
                             }
-                            case 3 -> j.allIn();
-                            case 4 -> j.fold();
+                            case 4 -> {
+                                j.fold();
+                                actuo.put(j, true);
+                            }
+                        }
+                    }
+                    if (!huboApuesta) {
+                        if (actuo.entrySet().stream().filter(e -> e.getKey().isEnRonda()).allMatch(Map.Entry::getValue)) {
+                            construirPozos();
+                            break outer;
+                        }
+                    } else {
+                        if (estanTodosIgualados() && todosActuaron(actuo)) {
+                            construirPozos();
+                            if (noQuedanAcciones()) {
+                                System.out.println("No queda acción posible. Avanzando directo al showdown...");
+                                while (ronda != Ronda.SHOWDOWN) avanzarRonda();
+                                showdown();
+                            }
+                            break outer;
                         }
                     }
                     long activos = jugadores.stream().filter(Jugador::isEnRonda).count();
                     if (activos == 1){
                         Jugador ganador = jugadores.stream().filter(Jugador::isEnRonda).findFirst().get();
-                        int total = 0;
-                        for (Jugador jug : jugadores){
-                            total += jug.getApuestaEnRonda();
-                            jug.setApuestaEnRonda(0);
-                        }
-                        for (Pozo p : pozos) {
-                            total += p.getCantidad();
-                        }
+                        int total = jugadores.stream().mapToInt(Jugador::getApuestaEnRonda).sum() + pozos.stream().mapToInt(Pozo::getCantidad).sum();
                         ganador.ganarFichas(total);
-                        System.out.println("Todos se retiraron. " + ganador.getNombre() + " gana automáticamente " + total + " fichas");
-                        System.out.println(ganador.getFichas());
+                        System.out.println("Todos se retiraron. " + ganador.getNombre() + " gana " + total);
                         pozos.clear();
-                        return;
-                    }
+                        break outer;
+                        }
                 } while (invalido);
             }
-            todosIgualados = true;
-            for (Jugador j : jugadores) {
-                if (j.isEnRonda() && !j.isAllIn() && j.getApuestaEnRonda() < apuestaActual) {
-                    todosIgualados = false;
-                    break;
-                }
-            }
-            boolean todosAllIn = jugadores.stream().filter(Jugador::isEnRonda).allMatch(Jugador::isAllIn);
-            if (todosAllIn) {
-                System.out.println("Todos los jugadores están ALL-IN. Se revelan las cartas restantes...");
-                while (ronda != Ronda.SHOWDOWN) {
-                    avanzarRonda();
-                }
-                showdown();
-                return;
-            }
-        } while (!todosIgualados && jugadores.stream().filter(Jugador::isEnRonda).count() > 1);
-        construirPozos();
+        } while (true);
     } //YA ESTÁ
 
     public void nuevaMano(){
-        jugadores.removeIf(jugador -> !jugador.isEnRonda());
-        jugadores.removeIf(j -> j.getFichas() <= 0);
         if (jugadores.size() <= 1) {
             return;
         }
@@ -328,18 +346,17 @@ public class Mesa {
         comunitarias.clear();
         pozos.clear();
         for (Jugador j : jugadores){
-            j.getMano().clear();
-            j.resetApuesta();
-            j.setEnRonda(true);
+            j.resetJugador();
         }
         dealerIndex = (dealerIndex + 1) % jugadores.size();
         asignarCiegas();
         repartoInicial();
         ronda = Ronda.PREFLOP;
+        apuestaActual = 0;
     } //YA ESTÁ
 
     public boolean partidaTerminada() {
-        return jugadores.stream().filter(Jugador::isEnRonda).count() <= 1;
+        return jugadores.size() <= 1;
     } //YA ESTÁ
 
     public String getGanadorFinal() {
@@ -381,4 +398,36 @@ public class Mesa {
         System.out.println("==================\n");
     }
 
+    private boolean estanTodosIgualados() {
+        return jugadores.stream()
+                .filter(Jugador::isEnRonda)
+                .allMatch(j -> j.isAllIn() || j.getApuestaEnRonda() == apuestaActual);
+
+    }
+
+    private boolean noQuedanAcciones() {
+        long activosNoAllIn = jugadores.stream().filter(Jugador::isEnRonda).filter(j -> !j.isAllIn()).count();
+        return activosNoAllIn <= 1;
+    }
+
+    private int pedirCantidad(Jugador j, int minimo, int maximo) {
+        while (true) {
+            System.out.println("¿Cuánto apuesta " + j.getNombre() + "? (mínimo " + minimo + ", máximo " + maximo + ")");
+            try {
+                int cantidad = Integer.parseInt(sc.nextLine());
+                if (cantidad < minimo || cantidad > maximo) {
+                    System.out.println("Cantidad inválida, intenta de nuevo.");
+                } else {
+                    return cantidad;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida, escribe un número válido.");
+            }
+        }
+    }
+
+    private boolean todosActuaron(Map<Jugador, Boolean> yaActuo) {
+        return jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> j.isAllIn() || yaActuo.getOrDefault(j, false));
+    }
 }
+

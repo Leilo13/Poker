@@ -10,8 +10,9 @@ public enum Ronda {
             case PREFLOP -> FLOP;
             case FLOP -> TURN;
             case TURN -> RIVER;
-            case RIVER -> SHOWDOWN;
-            case SHOWDOWN -> PREFLOP;
+            default -> SHOWDOWN;
+            //case RIVER -> SHOWDOWN;
+            //case SHOWDOWN -> PREFLOP;
         };
     }
 }

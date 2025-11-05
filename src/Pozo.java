@@ -20,9 +20,7 @@ public class Pozo {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Pozo[")
-                .append(cantidad)
-                .append(", participantes=");
+        sb.append("Pozo[").append(cantidad).append(", participantes=");
         for (int i = 0; i < participantes.size(); i++) {
             sb.append(participantes.get(i).getNombre());
             if (i < participantes.size() - 1) sb.append(",");

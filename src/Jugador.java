@@ -11,21 +11,33 @@ public class Jugador {
 
     public Jugador(String nombre) {
         this.nombre = nombre;
-        this.fichas = 1000;
+        this.fichas = 100;
         this.mano = new ArrayList<>();
         this.enRonda = true;
         this.allIn = false;
         this.apuestaEnRonda = 0;
-    } //YA ESTÁ
-
+    }
+    public Jugador(String nombre, int fichas) {//Constructor de debugeo
+        this.nombre = nombre;
+        this.fichas = fichas;
+        this.mano = new ArrayList<>();
+        this.enRonda = true;
+        this.allIn = false;
+        this.apuestaEnRonda = 0;
+    }
     //Acciones de juego
     public void recibir(Carta c) { mano.add(c); } //YA ESTÁ
 
     public void call(int apuestaActual) {
         int diff = apuestaActual - apuestaEnRonda;
         if (diff >= fichas){
-            allIn();
-        } else {
+            apuestaEnRonda += fichas;
+            System.out.println(nombre + " iguala con " + fichas + " y queda ALL-IN");
+            fichas = 0;
+            allIn = true;
+        } else if (diff == 0) {
+            System.out.println(nombre + " pasa.");
+        }else{
             fichas -= diff;
             apuestaEnRonda += diff;
             System.out.println(nombre + " iguala con " + diff);
@@ -37,21 +49,28 @@ public class Jugador {
         if (nuevaApuesta <= apuestaActual || diff > fichas) return -1;//Inválido
         fichas -= diff;
         apuestaEnRonda = nuevaApuesta;
-        System.out.println(nombre + " sube a " + nuevaApuesta);
+        if (fichas == 0) {
+            allIn = true;
+            System.out.println(nombre + " sube a " + nuevaApuesta + " y queda ALL-IN");
+        } else {
+            System.out.println(nombre + " sube a " + nuevaApuesta);
+        }
         return diff;
-    } //YA ESTÁ
+    }
 
     public void allIn() {
-        apuestaEnRonda += fichas;
-        fichas=0;
-        allIn = true;
-        System.out.println(nombre + " va ALL-IN con " + apuestaEnRonda);
-    } //YA ESTÁ
+        if (fichas > 0) {
+            apuestaEnRonda += fichas;
+            fichas = 0;
+            allIn = true;
+            System.out.println(nombre + " va ALL-IN con " + apuestaEnRonda);
+        }
+    }
 
     public void fold() {
         enRonda=false;
         System.out.println(nombre + " se retira.");
-    } //YA ESTÁ
+    }
 
     public int pagarBlind(int cantidad) {
         int pagado = Math.min(cantidad, fichas);
@@ -59,16 +78,17 @@ public class Jugador {
         apuestaEnRonda += pagado;
         if (fichas == 0) allIn = true;
         return pagado;
-    } //YA ESTÁ
+    }
 
-    public void ganarFichas(int cantidad) { fichas += cantidad; } //YA ESTÁ
+    public void ganarFichas(int cantidad) { fichas += cantidad; }
 
     //Utilidades
-    public void resetApuesta(){
+    public void resetJugador(){
         apuestaEnRonda = 0;
         enRonda = true;
         allIn = false;
-    } //YA ESTÁ
+        mano.clear();
+    }
 
     public void imprimirMano(){
         for (Carta c:mano){

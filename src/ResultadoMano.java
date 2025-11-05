@@ -18,7 +18,7 @@ public class ResultadoMano {
 
     @Override
     public String toString() {
-        return tipo + " " + desempate;
+        return tipo + " " + cartasGanadoras;
     }
     /*@Override
     public String toString(){

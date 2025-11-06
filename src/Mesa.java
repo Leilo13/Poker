@@ -199,6 +199,7 @@ public class Mesa {
         }
         Map<Jugador, Boolean> actuo = new HashMap<>();
         jugadores.stream().filter(Jugador::isEnRonda).forEach(j -> actuo.put(j, false));
+        jugadores.stream().filter(Jugador::isAllIn).forEach(j -> actuo.put(j, true));
         boolean huboApuesta = (apuestaActual > 0);
         int ultimoAgresorIndex = -1;
         outer:
@@ -287,7 +288,7 @@ public class Mesa {
                                 actuo.put(j, true);
                             }
                             case 2 -> {
-                                int apuesta = pedirCantidad(j, 1, j.getFichas());
+                                int apuesta = pedirCantidad(j, (apuestaActual + 1), j.getFichas());
                                 j.raise(apuesta, apuestaActual);
                                 apuestaActual = apuesta;
                                 huboApuesta = true;

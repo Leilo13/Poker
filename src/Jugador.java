@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-
 public class Jugador {
     private final String nombre;
     private int fichas;
@@ -17,59 +16,48 @@ public class Jugador {
         this.allIn = false;
         this.apuestaEnRonda = 0;
     }
-    public Jugador(String nombre, int fichas) {//Constructor de debugeo
-        this.nombre = nombre;
-        this.fichas = fichas;
-        this.mano = new ArrayList<>();
-        this.enRonda = true;
-        this.allIn = false;
-        this.apuestaEnRonda = 0;
-    }
     //Acciones de juego
     public void recibir(Carta c) { mano.add(c); } //YA ESTÁ
 
-    public void call(int apuestaActual) {
+    public String call(int apuestaActual) {
         int diff = apuestaActual - apuestaEnRonda;
+        if (diff == 0) return nombre + " pasa.";
         if (diff >= fichas){
             apuestaEnRonda += fichas;
-            System.out.println(nombre + " iguala con " + fichas + " y queda ALL-IN");
             fichas = 0;
             allIn = true;
-        } else if (diff == 0) {
-            System.out.println(nombre + " pasa.");
-        }else{
+            return nombre + " iguala con " + fichas + " y queda ALL-IN";
+        }
             fichas -= diff;
             apuestaEnRonda += diff;
-            System.out.println(nombre + " iguala con " + diff);
-        }
+            return nombre + " iguala con " + diff;
     } //YA ESTÁ
 
-    public int raise(int nuevaApuesta, int apuestaActual) {
+    public String raise(int nuevaApuesta) {
         int diff = nuevaApuesta - apuestaEnRonda;
-        if (nuevaApuesta <= apuestaActual || diff > fichas) return -1;//Inválido
         fichas -= diff;
         apuestaEnRonda = nuevaApuesta;
         if (fichas == 0) {
             allIn = true;
-            System.out.println(nombre + " sube a " + nuevaApuesta + " y queda ALL-IN");
+            return nombre + " sube a " + nuevaApuesta + " y queda ALL-IN";
         } else {
-            System.out.println(nombre + " sube a " + nuevaApuesta);
+            return nombre + " sube a " + nuevaApuesta;
         }
-        return diff;
     }
 
-    public void allIn() {
+    public String allIn() {
         if (fichas > 0) {
             apuestaEnRonda += fichas;
             fichas = 0;
             allIn = true;
-            System.out.println(nombre + " va ALL-IN con " + apuestaEnRonda);
+           return nombre + " va ALL-IN con " + apuestaEnRonda;
         }
+        return nombre + " ya estaba ALL-IN";
     }
 
-    public void fold() {
+    public String fold() {
         enRonda=false;
-        System.out.println(nombre + " se retira.");
+        return nombre + " se retira.";
     }
 
     public int pagarBlind(int cantidad) {
@@ -88,13 +76,6 @@ public class Jugador {
         enRonda = true;
         allIn = false;
         mano.clear();
-    }
-
-    public void imprimirMano(){
-        for (Carta c:mano){
-            System.out.print(c + " ");
-        }
-        System.out.println();
     }
 
     //Getters y setters

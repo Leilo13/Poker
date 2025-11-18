@@ -1,5 +1,4 @@
 import java.util.Objects;
-
 public class Carta {
     private final Valor valor;
     private final Mazo mazo;
@@ -15,13 +14,9 @@ public class Carta {
 
     @Override
     public String toString(){
+        if (valor == null || mazo == null) return "[??]";
         String simbolo = mazo.getSimbolo();
-        String color;
-        if (simbolo.equals("♥") || simbolo.equals("♦")){
-            color = "\u001B[31m";
-        } else {
-            color = "\u001B[37m";
-        }
+        String color = (simbolo.equals("♥") || simbolo.equals("♦")) ? "\u001B[31m" : "\u001B[37m";
         return color + "[" + valor.getEtiqueta() + mazo.getSimbolo() + "]" + "\u001B[0m";
     }
 

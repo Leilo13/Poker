@@ -1,35 +1,53 @@
-import java.util.Scanner;
+import java.util.*;
 public class Main {
     public static void main(String[] args) {
-        Mesa mesa = new Mesa(); // crea jugadores, asigna ciegas, reparte cartas
-        Scanner sc = new Scanner(System.in);
-        // Bucle de manos
+        Mesa mesa = new Mesa();
+        ConsolaUI consola = new ConsolaUI();
+        List<String> nombresHumanos = consola.pedirNombresJugadores();
+        mesa.crearJugadores(nombresHumanos);
+        int cantidadBots = consola.pedirCantidadBots(nombresHumanos.size());
+        List<AgenteInteligente> agentes = new ArrayList<>();
+        for (int i = 1; i <= cantidadBots; i++) {
+            AgenteInteligente bot = new AgenteInteligente("Bot" + i);
+            agentes.add(bot);
+            mesa.crearJugadores(bot.pedirNombresJugadores());
+        }
+        Map<Jugador, InterfazJuego> interfaces = new HashMap<>();
+        for (Jugador j : mesa.getJugadores()) {
+            if (nombresHumanos.contains(j.getNombre())) {
+                interfaces.put(j, consola);
+            } else {
+                for (AgenteInteligente ai : agentes) {
+                    if (ai.pedirNombresJugadores().contains(j.getNombre())) interfaces.put(j, ai);
+                }
+            }
+        }
         while (true) {
             System.out.println("\n=== Nueva mano ===");
-            mesa.imprimirDebug(); // estado inicial de la mano
-            while (mesa.getRonda() != Ronda.SHOWDOWN) {
-                mesa.rondaDeApuestas();
-                mesa.avanzarRonda();
-            }
-            mesa.showdown();
-            if (mesa.partidaTerminada()) {
-                System.out.println("El juego ha terminado.");
-                break;
-            }
-            String respuesta;
-            do {
-                System.out.println("¿Quieres jugar otra mano? s/n");
-                respuesta = sc.nextLine().trim().toLowerCase();
-                if (!respuesta.equals("s") && !respuesta.equals("n")) {
-                    System.out.println("Opción no válida. Por favor escribe 's' o 'n'.");
-                }
-            } while (!respuesta.equals("s") && !respuesta.equals("n"));
-            if (respuesta.equals("n")) {
-                System.out.println("El juego ha terminado");
-                break;
-            }
             mesa.nuevaMano();
+            ResultadoApuesta resultado;
+            resultado = mesa.rondaDeApuestas(interfaces);
+            if (mostrarSiHayResultado(resultado)) continue;
+            mesa.avanzarRonda();
+            resultado = mesa.rondaDeApuestas(interfaces);
+            if (mostrarSiHayResultado(resultado)) continue;
+            mesa.avanzarRonda();
+            resultado = mesa.rondaDeApuestas(interfaces);
+            if (mostrarSiHayResultado(resultado)) continue;
+            mesa.avanzarRonda();
+            resultado = mesa.rondaDeApuestas(interfaces);
+            if (mostrarSiHayResultado(resultado)) continue;
+            mesa.avanzarRonda();
+            List<ResultadoShowdown> showdowns = mesa.showdown();
+            consola.mostrarShowdown(showdowns);
         }
-        sc.close();
+    }
+    private static boolean mostrarSiHayResultado(ResultadoApuesta resultado) {
+        if (resultado != null) {
+            String ganadores = resultado.getGanadores().stream().map(Jugador::getNombre).reduce((a, b) -> a + ", " + b).orElse("");
+            System.out.println("[Resultado] " + ganadores + " ganan " + resultado.getDescripcion() + ")");
+            return true;
+        }
+        return false;
     }
 }

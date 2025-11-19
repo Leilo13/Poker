@@ -6,13 +6,9 @@ public record ResultadoShowdown (
         int premio
 ) implements ResultadoApuesta {
     @Override
-    public List<Jugador> getGanadores() { return ganadores; }
+    public List<Jugador> ganadores() { return ganadores; }
     @Override
-    public int getCantidad() { return premio; }
-    @Override
-    public String getDescripcion() {
-        return ganadores.size() > 1
-            ? "Empate con " + mejorMano.getTipo()
-            : "Gana con " + mejorMano.getTipo();
+    public String descripcion() {
+        return ganadores.size() > 1 ? "Empate con " + mejorMano.tipo() : "Gana con " + mejorMano.tipo();
     }
 }

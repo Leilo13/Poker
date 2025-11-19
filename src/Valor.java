@@ -8,17 +8,14 @@ public enum Valor {
     AS(14, "A");
     private final int valor;
     private final String etiqueta;
-
     Valor(int valor, String etiqueta){
         this.valor=valor;
         this.etiqueta=etiqueta;
     }
-
-    public int getValor() {
-        return valor;
-    }
-
-    public String getEtiqueta() {
+    public String etiqueta() {
         return etiqueta;
+    }
+    public int valor() {
+        return valor;
     }
 }

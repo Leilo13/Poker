@@ -8,7 +8,5 @@ public record EstadoJugador(
     boolean allIn,
     List<Carta> manoVisible
 ){
-    public String manoComoTexto() {
-        return manoVisible.stream().map(Carta::toString).collect(Collectors.joining(" "));
-    }
+    public String manoComoTexto() { return manoVisible.stream().map(Carta::toString).collect(Collectors.joining(" ")); }
 }

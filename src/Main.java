@@ -26,26 +26,31 @@ public class Main {
             System.out.println("\n=== Nueva mano ===");
             mesa.nuevaMano();
             ResultadoApuesta resultado;
+            System.out.println("Preflop");
             resultado = mesa.rondaDeApuestas(interfaces);
             if (mostrarSiHayResultado(resultado)) continue;
             mesa.avanzarRonda();
+            System.out.println("flop");
             resultado = mesa.rondaDeApuestas(interfaces);
             if (mostrarSiHayResultado(resultado)) continue;
             mesa.avanzarRonda();
+            System.out.println("turn");
             resultado = mesa.rondaDeApuestas(interfaces);
             if (mostrarSiHayResultado(resultado)) continue;
             mesa.avanzarRonda();
+            System.out.println("river");
             resultado = mesa.rondaDeApuestas(interfaces);
             if (mostrarSiHayResultado(resultado)) continue;
             mesa.avanzarRonda();
+            System.out.println("chowdown");
             List<ResultadoShowdown> showdowns = mesa.showdown();
             consola.mostrarShowdown(showdowns);
         }
     }
     private static boolean mostrarSiHayResultado(ResultadoApuesta resultado) {
         if (resultado != null) {
-            String ganadores = resultado.getGanadores().stream().map(Jugador::getNombre).reduce((a, b) -> a + ", " + b).orElse("");
-            System.out.println("[Resultado] " + ganadores + " ganan " + resultado.getDescripcion() + ")");
+            String ganadores = resultado.ganadores().stream().map(Jugador::getNombre).reduce((a, b) -> a + ", " + b).orElse("");
+            System.out.println("[Resultado] " + ganadores + " ganan " + resultado.descripcion() + ")");
             return true;
         }
         return false;

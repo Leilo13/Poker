@@ -4,10 +4,9 @@ public class Jugador {
     private final String nombre;
     private int fichas;
     private int apuestaEnRonda;
-    private List<Carta> mano;
+    private final List<Carta> mano;
     private boolean enRonda;
     private boolean allIn;
-
     public Jugador(String nombre) {
         this.nombre = nombre;
         this.fichas = 100;
@@ -16,9 +15,15 @@ public class Jugador {
         this.allIn = false;
         this.apuestaEnRonda = 0;
     }
-    //Acciones de juego
-    public void recibir(Carta c) { mano.add(c); } //YA ESTÁ
-
+    public String allIn() {
+        if (fichas > 0) {
+            apuestaEnRonda += fichas;
+            fichas = 0;
+            allIn = true;
+            return nombre + " va ALL-IN con " + apuestaEnRonda;
+        }
+        return nombre + " ya estaba ALL-IN";
+    }
     public String call(int apuestaActual) {
         int diff = apuestaActual - apuestaEnRonda;
         if (diff == 0) return nombre + " pasa.";
@@ -26,15 +31,33 @@ public class Jugador {
             apuestaEnRonda += fichas;
             fichas = 0;
             allIn = true;
-            return nombre + " iguala con " + fichas + " y queda ALL-IN";
+            return nombre + " iguala con toddas sus fichas (" + fichas + ") y queda ALL-IN";
         }
-            fichas -= diff;
-            apuestaEnRonda += diff;
-            return nombre + " iguala con " + diff;
-    } //YA ESTÁ
-
+        fichas -= diff;
+        apuestaEnRonda += diff;
+        return nombre + " iguala con " + diff;
+    }
+    public String fold() {
+        enRonda=false;
+        return nombre + " se retira.";
+    }
+    public void ganarFichas(int cantidad) { fichas += cantidad; }
+    public int getApuestaEnRonda() { return apuestaEnRonda; }
+    public int getFichas() { return fichas; }
+    public List<Carta> getMano() { return List.copyOf(mano); }
+    public String getNombre() { return nombre; }
+    public boolean isAllIn() { return allIn; }
+    public boolean isEnRonda() { return enRonda; }
+    public int pagarBlind(int cantidad) {
+        int pagado = Math.min(cantidad, fichas);
+        fichas -= pagado;
+        apuestaEnRonda += pagado;
+        if (fichas == 0) allIn = true;
+        return pagado;
+    }
     public String raise(int nuevaApuesta) {
         int diff = nuevaApuesta - apuestaEnRonda;
+        if (diff > fichas) return nombre + " no tiene suficientes fichas para subir";
         fichas -= diff;
         apuestaEnRonda = nuevaApuesta;
         if (fichas == 0) {
@@ -44,47 +67,12 @@ public class Jugador {
             return nombre + " sube a " + nuevaApuesta;
         }
     }
-
-    public String allIn() {
-        if (fichas > 0) {
-            apuestaEnRonda += fichas;
-            fichas = 0;
-            allIn = true;
-           return nombre + " va ALL-IN con " + apuestaEnRonda;
-        }
-        return nombre + " ya estaba ALL-IN";
-    }
-
-    public String fold() {
-        enRonda=false;
-        return nombre + " se retira.";
-    }
-
-    public int pagarBlind(int cantidad) {
-        int pagado = Math.min(cantidad, fichas);
-        fichas -= pagado;
-        apuestaEnRonda += pagado;
-        if (fichas == 0) allIn = true;
-        return pagado;
-    }
-
-    public void ganarFichas(int cantidad) { fichas += cantidad; }
-
-    //Utilidades
+    public void recibir(Carta c) { mano.add(c); }
     public void resetJugador(){
         apuestaEnRonda = 0;
         enRonda = true;
         allIn = false;
         mano.clear();
     }
-
-    //Getters y setters
-    public String getNombre() { return nombre; }
-    public int getFichas() { return fichas; }
-    public int getApuestaEnRonda() { return apuestaEnRonda; }
-    public List<Carta> getMano() { return mano; }
-    public boolean isEnRonda() { return enRonda; }
-    public boolean isAllIn() { return allIn; }
-    public void setEnRonda(boolean enRonda) { this.enRonda = enRonda; }
     public void setApuestaEnRonda(int apuestaEnRonda) { this.apuestaEnRonda = apuestaEnRonda; }
 }

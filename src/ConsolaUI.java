@@ -69,6 +69,7 @@ public class ConsolaUI implements InterfazJuego{
     }
     public int pedirCantidadBots(int jugadoresHumanos) {
         int maxBots = 23 - jugadoresHumanos;
+        if (jugadoresHumanos == 1) return leerEnteroEnRango("¿Cuántos bots van a jugar? (1 - " + maxBots + ")", 1, maxBots);
         return leerEnteroEnRango("¿Cuántos bots van a jugar? (0 - " + maxBots + ")", 0, maxBots);
     }
     public List<String> pedirNombresJugadores() {

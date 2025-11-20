@@ -9,7 +9,7 @@ public class Jugador {
     private boolean allIn;
     public Jugador(String nombre) {
         this.nombre = nombre;
-        this.fichas = 100;
+        this.fichas = 500;
         this.mano = new ArrayList<>();
         this.enRonda = true;
         this.allIn = false;

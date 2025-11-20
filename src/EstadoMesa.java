@@ -4,4 +4,4 @@ public record EstadoMesa (
         int apuestaActual,
         List<EstadoJugador> jugadores,
         List<Carta> comunitarias
-) { }
+) {}

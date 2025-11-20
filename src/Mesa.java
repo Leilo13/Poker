@@ -11,7 +11,6 @@ public class Mesa {
     private final List<Jugador> jugadores = new ArrayList<>();
     private final List<Carta> comunitarias = new ArrayList<>();
     private final List<Pozo> pozos = new ArrayList<>();
-    private boolean primeraMano = true;
     public Mesa() {
         ronda = Ronda.PREFLOP;
     }
@@ -128,6 +127,9 @@ public class Mesa {
     }
     private boolean estanTodosIgualados() {
         return jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> j.isAllIn() || j.getApuestaEnRonda() == apuestaActual);
+    }
+    public Jugador ganadorFinal() {
+        return getJugadores().stream().filter(j -> j.getFichas() > 0).findFirst().orElse(null);
     }
     public int getApuestaActual() { return apuestaActual; }
     public int getBigBlind() { return bigBlind; }

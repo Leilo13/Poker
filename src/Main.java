@@ -22,35 +22,49 @@ public class Main {
                 }
             }
         }
-        while (true) {
+        boolean continuar = true;
+        while (continuar) {
             System.out.println("\n=== Nueva mano ===");
-            mesa.nuevaMano();
+            consola.mostrarResultadoCiegas(mesa.nuevaMano());
             ResultadoApuesta resultado;
-            System.out.println("Preflop");
+            System.out.println("=== PREFLOP ===");
             resultado = mesa.rondaDeApuestas(interfaces);
-            if (mostrarSiHayResultado(resultado)) continue;
+            if (mostrarSiHayResultado(consola, resultado)) continue;
+            consola.mostrarEstadoMesa(mesa.estadoMesa(null, false));
             mesa.avanzarRonda();
-            System.out.println("flop");
+            System.out.println("=== FLOP ===");
             resultado = mesa.rondaDeApuestas(interfaces);
-            if (mostrarSiHayResultado(resultado)) continue;
+            if (mostrarSiHayResultado(consola, resultado)) continue;
+            consola.mostrarEstadoMesa(mesa.estadoMesa(null, false));
             mesa.avanzarRonda();
-            System.out.println("turn");
+            System.out.println("=== TURN ===");
             resultado = mesa.rondaDeApuestas(interfaces);
-            if (mostrarSiHayResultado(resultado)) continue;
+            if (mostrarSiHayResultado(consola, resultado)) continue;
+            consola.mostrarEstadoMesa(mesa.estadoMesa(null, false));
             mesa.avanzarRonda();
-            System.out.println("river");
+            System.out.println("=== RIVER ===");
             resultado = mesa.rondaDeApuestas(interfaces);
-            if (mostrarSiHayResultado(resultado)) continue;
+            if (mostrarSiHayResultado(consola, resultado)) continue;
+            consola.mostrarEstadoMesa(mesa.estadoMesa(null, false));
             mesa.avanzarRonda();
-            System.out.println("chowdown");
+            System.out.println("=== SHOWDOWN ===");
             List<ResultadoShowdown> showdowns = mesa.showdown();
             consola.mostrarShowdown(showdowns);
+            if (mesa.partidaTerminada()) {
+                Jugador campeon = mesa.ganadorFinal();
+                System.out.println("\nJuego terminado: " + campeon.getNombre() + " es el ganador con todas las fichas.");
+                break;
+            }
+            System.out.println("¿Quieres jugar otra mano? (s/n)");
+            String respuesta = consola.leerLinea(Set.of("s", "n"));
+            continuar = respuesta.equals("s");
         }
+        System.out.println("Gracias por jugar.");
     }
-    private static boolean mostrarSiHayResultado(ResultadoApuesta resultado) {
+    private static boolean mostrarSiHayResultado(ConsolaUI consola, ResultadoApuesta resultado) {
         if (resultado != null) {
             String ganadores = resultado.ganadores().stream().map(Jugador::getNombre).reduce((a, b) -> a + ", " + b).orElse("");
-            System.out.println("[Resultado] " + ganadores + " ganan " + resultado.descripcion() + ")");
+            consola.mostrarAccion("[Resultado] " + ganadores + " ganan " + resultado.descripcion());
             return true;
         }
         return false;

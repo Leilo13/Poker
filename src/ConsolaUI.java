@@ -61,7 +61,6 @@ public class ConsolaUI implements InterfazJuego{
         System.out.println("Apuesta actual: " + r.apuestaActual() + "\n");
     }
     public void mostrarShowdown(List<ResultadoShowdown> resultados) {
-        System.out.println("\n=== SHOWDOWN ===");
         for (ResultadoShowdown r : resultados) {
             String ganadores = String.join(", ", r.ganadores().stream().map(Jugador::getNombre).toList());
             System.out.println("Ganadores del " + r.pozo() + " -> " + ganadores + " con " + r.mejorMano() + " (premio: " + r.premio() + ")");

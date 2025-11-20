@@ -102,7 +102,7 @@ public class Mesa {
                 cantidadPozo += fichasRetirados;
                 pozos.add(new Pozo(cantidadPozo, participantes));
             } else {
-                Pozo ultimo = pozos.get(pozos.size() - 1);
+                Pozo ultimo = pozos.getLast();
                 if (ultimo.getParticipantes().containsAll(participantes) && participantes.containsAll(ultimo.getParticipantes())) {
                     ultimo.setCantidad(ultimo.getCantidad() + cantidadPozo);
                 } else {
@@ -128,9 +128,7 @@ public class Mesa {
     private boolean estanTodosIgualados() {
         return jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> j.isAllIn() || j.getApuestaEnRonda() == apuestaActual);
     }
-    public Jugador ganadorFinal() {
-        return getJugadores().stream().filter(j -> j.getFichas() > 0).findFirst().orElse(null);
-    }
+    public Jugador ganadorFinal() { return getJugadores().stream().filter(j -> j.getFichas() > 0).findFirst().orElse(null); }
     public int getApuestaActual() { return apuestaActual; }
     public int getBigBlind() { return bigBlind; }
     public List<Carta> getComunitarias() { return List.copyOf(comunitarias); }
@@ -160,12 +158,15 @@ public class Mesa {
         List<Accion> opciones = new ArrayList<>();
         int diff = apuestaActual - j.getApuestaEnRonda();
         int fichas = j.getFichas();
-        if (diff == 0) opciones.add(Accion.CHECK);
-        else if (diff > 0 && fichas >= diff) opciones.add(Accion.CALL);
+        if (diff == 0) {
+            opciones.add(Accion.CHECK);
+        } else {
+            if (fichas >= diff) opciones.add(Accion.CALL);
+            else opciones.add(Accion.FOLD);
+        }
         int minNuevaApuesta = apuestaActual + bigBlind;
         if (j.getApuestaEnRonda() + fichas >= minNuevaApuesta) opciones.add(Accion.RAISE);
         if (fichas > 0) opciones.add(Accion.ALL_IN);
-        if (diff > 0) opciones.add(Accion.FOLD);
         return opciones;
     }
     public boolean partidaTerminada() { return jugadores.size() <= 1; }
@@ -230,6 +231,7 @@ public class Mesa {
             ResultadoMano mejor = null;
             List<Jugador> ganadores = new ArrayList<>();
             for (Jugador j : p.getParticipantes()) {
+                if (!j.isEnRonda()) continue;
                 ResultadoMano r = juez.evaluarMejorMano(j.getMano(), comunitarias);
                 if (mejor == null || juez.compararResultados(r, mejor) > 0) {
                     ganadores.clear();

@@ -5,7 +5,6 @@ public class Mesa {
     private int dealerIndex = -1;
     private final int smallBlind = 10;
     private final int bigBlind = 2 * smallBlind;
-    private final Juez juez = new Juez();
     private final Baraja baraja = new Baraja();
     private Ronda ronda;
     private final List<Jugador> jugadores = new ArrayList<>();
@@ -232,12 +231,12 @@ public class Mesa {
             List<Jugador> ganadores = new ArrayList<>();
             for (Jugador j : p.getParticipantes()) {
                 if (!j.isEnRonda()) continue;
-                ResultadoMano r = juez.evaluarMejorMano(j.getMano(), comunitarias);
-                if (mejor == null || juez.compararResultados(r, mejor) > 0) {
+                ResultadoMano r = Juez.evaluarMejorMano(j.getMano(), comunitarias);
+                if (mejor == null || Juez.compararResultados(r, mejor) > 0) {
                     ganadores.clear();
                     ganadores.add(j);
                     mejor = r;
-                } else if (juez.compararResultados(r, mejor) == 0) {
+                } else if (Juez.compararResultados(r, mejor) == 0) {
                     ganadores.add(j);
                 }
             }

@@ -1,8 +1,9 @@
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-public class Juez {
-    private List<List<Carta>> combinar5(List<Carta> cartas) {
+public final class Juez {
+    private  Juez() {}
+    private static List<List<Carta>> combinar5(List<Carta> cartas) {
         List<List<Carta>> res = new ArrayList<>();
         int n = cartas.size();
         for (int a = 0; a < n; a++)
@@ -20,7 +21,7 @@ public class Juez {
                         }
         return res;
     }
-    public int compararResultados(ResultadoMano a, ResultadoMano b) {
+    public static int compararResultados(ResultadoMano a, ResultadoMano b) {
         int cmpTipo = Integer.compare(a.tipo().peso(),b.tipo().peso());
         if (cmpTipo != 0) return cmpTipo;
         List<Integer> da = a.desempate();
@@ -32,11 +33,11 @@ public class Juez {
         }
         return Integer.compare(da.size(), db.size());
     }
-    private boolean esColor(int[] conteoPalo) {
+    private static boolean esColor(int[] conteoPalo) {
         for (int count : conteoPalo) if (count == 5) return true;
         return false;
     }
-    private ResultadoMano evaluar5(List<Carta> mano5) {
+    private static ResultadoMano evaluar5(List<Carta> mano5) {
         int[] conteoValor = new int[15];
         int[] conteoPalo = new int[4];
         List<Integer> valores = new ArrayList<>();
@@ -97,7 +98,7 @@ public class Juez {
         }
         return new ResultadoMano(RankingMano.CARTA_ALTA, new ArrayList<>(valores), mano5);
     }
-    public ResultadoMano evaluarMejorMano(List<Carta> privadas, List<Carta> comunitarias) {
+    public static ResultadoMano evaluarMejorMano(List<Carta> privadas, List<Carta> comunitarias) {
         List<Carta> todas = new ArrayList<>(privadas);
         todas.addAll(comunitarias);
         List<List<Carta>> combinaciones = combinar5(todas);
@@ -110,7 +111,7 @@ public class Juez {
         }
         return mejor;
     }
-    private List<Integer> kickers(List<Integer> valoresDesc, List<Integer> excluidos, int cuantos) {
+    private static List<Integer> kickers(List<Integer> valoresDesc, List<Integer> excluidos, int cuantos) {
         List<Integer> ks = new ArrayList<>();
         for (int v : valoresDesc) {
             if (excluidos.contains(v)) continue;
@@ -118,7 +119,7 @@ public class Juez {
         }
         return ks;
     }
-    private int mapPalo(Mazo m) {
+    private static int mapPalo(Mazo m) {
         return switch (m) {
             case TREBOLES -> 0;
             case CORAZONES -> 1;
@@ -126,11 +127,11 @@ public class Juez {
             case DIAMANTES -> 3;
         };
     }
-    private int primerKicker(List<Integer> valoresDesc, List<Integer> excluidos) {
+    private static int primerKicker(List<Integer> valoresDesc, List<Integer> excluidos) {
         for (int v:valoresDesc) if (!excluidos.contains(v)) return v;
         return 0;
     }
-    private Integer valorEscalera(List<Integer> valoresDesc, int[] conteoValor) {
+    private static Integer valorEscalera(List<Integer> valoresDesc, int[] conteoValor) {
         List<Integer> uniq = new ArrayList<>();
         Integer prev = null;
         for (Integer v : valoresDesc) {

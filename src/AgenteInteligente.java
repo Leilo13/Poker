@@ -85,8 +85,7 @@ public class AgenteInteligente implements InterfazJuego {
     public Movimiento pedirMovimiento(Mesa mesa, Jugador j) {
         List<Accion> opciones = mesa.operacionesDisponibles(j);
         if (mesa.getRonda() == Ronda.PREFLOP) return decidirPreflop(mesa, j, opciones);
-        Juez juez = new Juez();
-        ResultadoMano mejorMano = juez.evaluarMejorMano(j.getMano(), mesa.getComunitarias());
+        ResultadoMano mejorMano = Juez.evaluarMejorMano(j.getMano(), mesa.getComunitarias());
         int jugadoresActivos = (int) mesa.getJugadores().stream().filter(Jugador::isEnRonda).count();
         int pozo = mesa.getPozoTotal();
         int stack = j.getFichas();

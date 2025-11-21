@@ -17,16 +17,14 @@ public class AgenteInteligente implements InterfazJuego {
         boolean suited = (c1.mazo() == c2.mazo());
         int gap = Math.abs(v1 - v2);
         if (par && v1 >= Valor.JOTA.valor()) return CategoriaPreflop.DELUXE;
-        if (suited && ((c1.valor() == Valor.AS && (c2.valor() == Valor.REY || c2.valor() == Valor.REINA)) || (c2.valor() == Valor.AS && (c1.valor() == Valor.REY || c1.valor() == Valor.REINA)))) {
-            return CategoriaPreflop.DELUXE;
-        }
+        if (suited && ((c1.valor() == Valor.AS && (c2.valor() == Valor.REY || c2.valor() == Valor.REINA)) || (c2.valor() == Valor.AS && (c1.valor() == Valor.REY || c1.valor() == Valor.REINA)))) return CategoriaPreflop.DELUXE;
         if (par && v1 >= Valor.OCHO.valor()) return CategoriaPreflop.FUERTE;
         if ((c1.valor() == Valor.AS && c2.valor() == Valor.REY) || (c1.valor() == Valor.REY && c2.valor() == Valor.AS)) return CategoriaPreflop.FUERTE;
         if ((c1.valor() == Valor.AS && c2.valor() == Valor.REINA) || (c1.valor() == Valor.REINA && c2.valor() == Valor.AS)) return CategoriaPreflop.FUERTE;
         if (suited && ((c1.valor() == Valor.AS && c2.valor() == Valor.JOTA) || (c2.valor() == Valor.AS && c1.valor() == Valor.JOTA))) return CategoriaPreflop.FUERTE;
         if (suited && ((c1.valor() == Valor.REY && c2.valor() == Valor.REINA) || (c2.valor() == Valor.REY && c1.valor() == Valor.REINA))) return  CategoriaPreflop.FUERTE;
         if (par) return CategoriaPreflop.DECENTE;
-        if (suited && gap == 1 && v1 >= Valor.SIETE.valor()) return CategoriaPreflop.DECENTE;
+        if (suited && gap == 1 && (v1 >= Valor.SIETE.valor() || v2 >= Valor.SIETE.valor())) return CategoriaPreflop.DECENTE;
         if (suited && (c1.valor() == Valor.AS || c2.valor() == Valor.AS)) return CategoriaPreflop.DECENTE;
         if (gap == 1 && !suited && v1 >= Valor.NUEVE.valor() && v2 >= Valor.NUEVE.valor()) return CategoriaPreflop.MALA;
         return CategoriaPreflop.PESIMA;
@@ -61,15 +59,19 @@ public class AgenteInteligente implements InterfazJuego {
             case MALA -> {
                 if (opciones.contains(Accion.CALL) && rng.nextDouble() < 0.2) {
                     yield new Movimiento(Accion.CALL, 0);
+                } else if (opciones.contains(Accion.CHECK)){
+                    yield new Movimiento(Accion.CHECK, 0);
                 } else {
-                    yield accionPorDefecto(opciones);
+                    yield new Movimiento(Accion.FOLD, 0);
                 }
             }
             default -> {
                 if (opciones.contains(Accion.CALL) && rng.nextDouble() < 0.05) {
                     yield new Movimiento(Accion.CALL, 0);
+                } else if (opciones.contains(Accion.CHECK)){
+                    yield new Movimiento(Accion.CHECK, 0);
                 } else {
-                    yield accionPorDefecto(opciones);
+                    yield new Movimiento(Accion.FOLD, 0);
                 }
             }
         };
@@ -106,10 +108,16 @@ public class AgenteInteligente implements InterfazJuego {
                 if (jugadoresActivos <= 2 && opciones.contains(Accion.RAISE) && pozo > mesa.getBigBlind() * 4 && rng.nextDouble() < 0.3) {
                     yield new Movimiento(Accion.RAISE, mesa.getApuestaActual() + mesa.getBigBlind());
                 } else {
+                    yield accionPorDefecto(opciones);
+                }
+            }
+            default -> {
+                if (opciones.contains(Accion.CHECK)) {
+                    yield new Movimiento(Accion.CHECK, 0);
+                } else {
                     yield new Movimiento(Accion.FOLD, 0);
                 }
             }
-            default -> accionPorDefecto(opciones);
         };
     }
 }

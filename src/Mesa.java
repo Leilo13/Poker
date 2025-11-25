@@ -1,5 +1,6 @@
 import java.util.*;
 import java.util.stream.Collectors;
+
 public class Mesa {
     private int apuestaActual;
     private int dealerIndex = -1;
@@ -10,9 +11,11 @@ public class Mesa {
     private final List<Jugador> jugadores = new ArrayList<>();
     private final List<Carta> comunitarias = new ArrayList<>();
     private final List<Pozo> pozos = new ArrayList<>();
+
     public Mesa() {
         ronda = Ronda.PREFLOP;
     }
+
     public String aplicarMovimiento(Jugador j, Movimiento mov) {
         switch (mov.accion()) {
             case CHECK, CALL -> {
@@ -41,6 +44,7 @@ public class Mesa {
             }
         }
     }
+
     public ResultadoCiegas asignarCiegas(){
         int sbIndex, bbIndex;
         if (jugadores.size() == 2) {
@@ -57,6 +61,7 @@ public class Mesa {
         apuestaActual = Math.max(sb,bb);
         return new ResultadoCiegas(smallBlindPlayer, sb, bigBlindPlayer, bb, apuestaActual);
     }
+
     public void avanzarRonda() {
         if (ronda == Ronda.SHOWDOWN) return;
         ronda = ronda.siguiente();
@@ -64,13 +69,17 @@ public class Mesa {
         jugadores.stream().filter(Jugador::isEnRonda).forEach(j -> j.setApuestaEnRonda(0));
         repartirComunitarias();
     }
+
     private int calcularStartIndex() {
         if (jugadores.size() == 2) return (ronda == Ronda.PREFLOP) ? dealerIndex : (dealerIndex + 1) % jugadores.size();
         return (ronda == Ronda.PREFLOP) ? (dealerIndex + 3) % jugadores.size() : (dealerIndex + 1) % jugadores.size();
     }
+
     private boolean condicionesDeCierre(boolean huboApuesta, Map<Jugador, Boolean> actuo) {
         if (!huboApuesta) {
-            if (jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> actuo.getOrDefault(j, false))) {
+            if (jugadores.stream()
+                    .filter(Jugador::isEnRonda)
+                    .allMatch(j -> actuo.getOrDefault(j, false))) {
                 construirPozos();
                 return true;
             }
@@ -82,12 +91,23 @@ public class Mesa {
         }
         return false;
     }
+
     private void construirPozos() {
-        int fichasRetirados = jugadores.stream().filter(j -> !j.isEnRonda() && j.getApuestaEnRonda() > 0).mapToInt(Jugador::getApuestaEnRonda).sum();
-        jugadores.forEach(j -> { if (!j.isEnRonda()) j.setApuestaEnRonda(0); });
-        List<Jugador> conApuesta = jugadores.stream().filter(j -> j.getApuestaEnRonda() > 0).collect(Collectors.toList());
+        int fichasRetirados = jugadores.stream()
+                .filter(j -> !j.isEnRonda() && j.getApuestaEnRonda() > 0)
+                .mapToInt(Jugador::getApuestaEnRonda)
+                .sum();
+        jugadores.forEach(j -> {
+            if (!j.isEnRonda()) j.setApuestaEnRonda(0);
+        });
+        List<Jugador> conApuesta = jugadores.stream()
+                .filter(j -> j.getApuestaEnRonda() > 0)
+                .collect(Collectors.toList());
         while (!conApuesta.isEmpty()) {
-            int minApuesta = conApuesta.stream().mapToInt(Jugador::getApuestaEnRonda).min().orElse(0);
+            int minApuesta = conApuesta.stream()
+                    .mapToInt(Jugador::getApuestaEnRonda)
+                    .min()
+                    .orElse(0);
             int cantidadPozo = 0;
             List<Jugador> participantes = new ArrayList<>();
             for (Jugador j : jugadores) {
@@ -125,19 +145,42 @@ public class Mesa {
         return new EstadoMesa(ronda, apuestaActual, estadoJugadores, new ArrayList<>(comunitarias));
     }
     private boolean estanTodosIgualados() {
-        return jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> j.isAllIn() || j.getApuestaEnRonda() == apuestaActual);
+        return jugadores.stream()
+                .filter(Jugador::isEnRonda)
+                .allMatch(j -> j.isAllIn() || j.getApuestaEnRonda() == apuestaActual);
     }
-    public Jugador ganadorFinal() { return getJugadores().stream().filter(j -> j.getFichas() > 0).findFirst().orElse(null); }
+
+    public Jugador ganadorFinal() {
+        return getJugadores().stream()
+                .filter(j -> j.getFichas() > 0)
+                .findFirst()
+                .orElse(null);
+    }
+
     public int getApuestaActual() { return apuestaActual; }
+
     public int getBigBlind() { return bigBlind; }
+
     public List<Carta> getComunitarias() { return List.copyOf(comunitarias); }
+
     public List<Jugador> getJugadores() { return List.copyOf(jugadores); }
-    public int getPozoTotal() { return pozos.stream().mapToInt(Pozo::getCantidad).sum(); }
+
+    public int getPozoTotal() {
+        return pozos.stream()
+                .mapToInt(Pozo::getCantidad)
+                .sum();
+    }
+
     public Ronda getRonda() { return ronda; }
+
     private Map<Jugador, Boolean> inicalizarMapaActuacion() {
         Map<Jugador, Boolean> actuo = new HashMap<>();
-        jugadores.stream().filter(Jugador::isEnRonda).forEach(j -> actuo.put(j, false));
-        jugadores.stream().filter(Jugador::isAllIn).forEach(j -> actuo.put(j, true));
+        jugadores.stream()
+                .filter(Jugador::isEnRonda)
+                .forEach(j -> actuo.put(j, false));
+        jugadores.stream()
+                .filter(Jugador::isAllIn)
+                .forEach(j -> actuo.put(j, true));
         return actuo;
     }
     public ResultadoCiegas nuevaMano(){
@@ -153,6 +196,7 @@ public class Mesa {
         ronda = Ronda.PREFLOP;
         return resultadoCiegas;
     }
+
     public List<Accion> operacionesDisponibles(Jugador j) {
         List<Accion> opciones = new ArrayList<>();
         int diff = apuestaActual - j.getApuestaEnRonda();
@@ -168,6 +212,7 @@ public class Mesa {
         if (fichas > 0) opciones.add(Accion.ALL_IN);
         return opciones;
     }
+
     public boolean partidaTerminada() { return jugadores.size() <= 1; }
     private void repartirComunitarias() {
         switch (ronda) {
@@ -176,11 +221,13 @@ public class Mesa {
             default -> {}
         }
     }
+
     private void repartoInicial() {
         for (Jugador j : jugadores) {
             for (int i = 0; i < 2; i++) j.recibir(baraja.repartir());
         }
     }
+
     private ResultadoFold resolverGanadorPorFold() {
         Optional<Jugador> ganadorOpt = jugadores.stream().filter(Jugador::isEnRonda).findFirst();
         if (ganadorOpt.isPresent()) {
@@ -193,6 +240,7 @@ public class Mesa {
         }
         return null;
     }
+
     public ResultadoApuesta rondaDeApuestas(Map<Jugador, InterfazJuego> interfaces) {
         if (jugadores.stream().filter(Jugador::isEnRonda).allMatch(Jugador::isAllIn)) {
             construirPozos();
@@ -221,6 +269,7 @@ public class Mesa {
             }
         }
     }
+
     public List<ResultadoShowdown> showdown() {
         List<ResultadoShowdown> resultados = new ArrayList<>();
         if (ronda != Ronda.SHOWDOWN) return resultados;
@@ -248,8 +297,10 @@ public class Mesa {
         jugadores.removeIf(j -> j.getFichas() <= 0);
         return resultados;
     }
+
     private boolean soloQuedaUnJugador() {
         return jugadores.stream().filter(Jugador::isEnRonda).count() == 1;
     }
+
     private boolean todosActuaron(Map<Jugador, Boolean> yaActuo) { return jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> j.isAllIn() || yaActuo.getOrDefault(j, false)); }
 }

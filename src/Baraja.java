@@ -1,10 +1,15 @@
 import java.util.List;
 import java.util.ArrayList;
+
 public class Baraja {
     private final List<Carta> cartas = new ArrayList<>();
+
+    // Inicia una baraja vacía
     public Baraja(){
         reiniciar();
     }
+
+    // Baraja las cartas
     private void barajar() {
         if (cartas.isEmpty() || cartas.size() == 1) return;
         int n = cartas.size();
@@ -15,6 +20,8 @@ public class Baraja {
             cartas.set(aux, temp);
         }
     }
+
+    // Limpia el mazo
     public void reiniciar() {
         cartas.clear();
         for (Mazo m : Mazo.values()) {
@@ -24,8 +31,11 @@ public class Baraja {
         }
         barajar();
     }
+
+    // Reparte la última carta de la baraja
     public Carta repartir() {
-        if (cartas.isEmpty()) throw new IllegalStateException("La baraja está vacía, no se pueden repartir más cartas.");
+        if (cartas.isEmpty())
+            throw new IllegalStateException("La baraja está vacía, no se pueden repartir más cartas.");
         return cartas.removeLast();
     }
 }

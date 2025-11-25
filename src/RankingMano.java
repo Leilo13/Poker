@@ -1,3 +1,4 @@
+// El valor o ranking numérico jerárquico de una mano.
 public enum RankingMano {
     CARTA_ALTA(1), PAR(2),
     DOS_PARES(3), TERCIA(4),

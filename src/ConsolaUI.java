@@ -1,6 +1,7 @@
 import java.util.*;
 public class ConsolaUI implements InterfazJuego{
     private final Scanner sc = new Scanner(System.in);
+
     private Accion leerAccionValida(List<Accion> opciones) {
         Accion accion = null;
         while (accion == null) {
@@ -17,6 +18,7 @@ public class ConsolaUI implements InterfazJuego{
         }
         return accion;
     }
+
     private int leerEnteroEnRango(String mensaje, int min, int max) {
         int valor = -1;
         while (valor < min || valor > max) {
@@ -32,6 +34,7 @@ public class ConsolaUI implements InterfazJuego{
         }
         return  valor;
     }
+
     public String leerLinea(Set<String> opcionesValidas) {
         String entrada;
         do {
@@ -42,6 +45,7 @@ public class ConsolaUI implements InterfazJuego{
         } while (!opcionesValidas.contains(entrada));
         return entrada;
     }
+
     public void mostrarEstadoMesa(EstadoMesa estado) {
         System.out.println("=== Ronda: " + estado.ronda() + " ===\nApuesta actual: " + estado.apuestaActual() + "----------------------------");
         for (EstadoJugador ej : estado.jugadores()) {
@@ -55,22 +59,26 @@ public class ConsolaUI implements InterfazJuego{
         }
         System.out.println();
     }
+
     public void mostrarResultadoCiegas(ResultadoCiegas r) {
         System.out.println(r.smallBlindPlayer().getNombre() + " paga SB: " + r.smallBlindPagada());
         System.out.println(r.bigBlindPlayer().getNombre() + " paga BB: " + r.bigBlindPagada());
         System.out.println("Apuesta actual: " + r.apuestaActual() + "\n");
     }
+
     public void mostrarShowdown(List<ResultadoShowdown> resultados) {
         for (ResultadoShowdown r : resultados) {
             String ganadores = String.join(", ", r.ganadores().stream().map(Jugador::getNombre).toList());
             System.out.println("Ganadores del " + r.pozo() + " -> " + ganadores + " con " + r.mejorMano() + " (premio: " + r.premio() + ")");
         }
     }
+
     public int pedirCantidadBots(int jugadoresHumanos) {
         int maxBots = 23 - jugadoresHumanos;
         if (jugadoresHumanos == 1) return leerEnteroEnRango("¿Cuántos bots van a jugar? (1 - " + maxBots + ")", 1, maxBots);
         return leerEnteroEnRango("¿Cuántos bots van a jugar? (0 - " + maxBots + ")", 0, maxBots);
     }
+
     public List<String> pedirNombresJugadores() {
         int nj = leerEnteroEnRango("¿Cuántos humanos van a jugar? (mínimo 1, máximo 23)", 1, 23);
         List<String> nombres = new ArrayList<>();
@@ -93,8 +101,10 @@ public class ConsolaUI implements InterfazJuego{
         }
         return nombres;
     }
+
     @Override
     public void mostrarAccion(String mensaje) { System.out.println(mensaje); }
+
     @Override
     public Movimiento pedirMovimiento(Mesa mesa, Jugador j) {
         List<Accion> opciones = mesa.operacionesDisponibles(j);

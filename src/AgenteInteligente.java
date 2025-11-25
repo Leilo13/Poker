@@ -1,13 +1,18 @@
 import java.util.*;
+// Ay wey...
+// Neta
 public class AgenteInteligente implements InterfazJuego {
     private final String nombre;
     private final Random rng = new Random();
+
     public AgenteInteligente(String nombre) { this.nombre = nombre; }
+
     private Movimiento accionPorDefecto(List<Accion> opciones) {
         if (opciones.contains(Accion.CALL)) return new Movimiento(Accion.CALL, 0);
         if (opciones.contains(Accion.CHECK)) return new Movimiento(Accion.CHECK, 0);
         return new Movimiento(Accion.FOLD, 0);
     }
+
     private CategoriaPreflop clasificarManoPreflop(List<Carta> mano) {
         Carta c1 = mano.get(0);
         Carta c2 = mano.get(1);
@@ -29,6 +34,7 @@ public class AgenteInteligente implements InterfazJuego {
         if (gap == 1 && !suited && v1 >= Valor.NUEVE.valor() && v2 >= Valor.NUEVE.valor()) return CategoriaPreflop.MALA;
         return CategoriaPreflop.PESIMA;
     }
+
     private Movimiento decidirPreflop(Mesa mesa, Jugador j, List<Accion> opciones) {
         CategoriaPreflop categoria = clasificarManoPreflop(j.getMano());
         return switch (categoria) {
@@ -76,19 +82,24 @@ public class AgenteInteligente implements InterfazJuego {
             }
         };
     }
+
     public List<String> pedirNombresJugadores() {
         return List.of(nombre);
     }
+
     @Override
     public void mostrarAccion(String mensaje) {
         System.out.println("[Agente] " + mensaje);
     }
+
     @Override
     public Movimiento pedirMovimiento(Mesa mesa, Jugador j) {
         List<Accion> opciones = mesa.operacionesDisponibles(j);
         if (mesa.getRonda() == Ronda.PREFLOP) return decidirPreflop(mesa, j, opciones);
         ResultadoMano mejorMano = Juez.evaluarMejorMano(j.getMano(), mesa.getComunitarias());
-        int jugadoresActivos = (int) mesa.getJugadores().stream().filter(Jugador::isEnRonda).count();
+        int jugadoresActivos = (int) mesa.getJugadores().stream()
+                .filter(Jugador::isEnRonda)
+                .count();
         int pozo = mesa.getPozoTotal();
         int stack = j.getFichas();
         return switch (mejorMano.tipo()) {

@@ -4,7 +4,7 @@ public class Main {
         Mesa mesa = new Mesa();
         ConsolaUI consola = new ConsolaUI();
         List<String> nombresHumanos = consola.pedirNombresJugadores();
-        mesa.crearJugadores(nombresHumanos);
+        mesa.crearJugadores(nombresHumanos);    // Crea los jugadores humanos en la mesa
         int cantidadBots = consola.pedirCantidadBots(nombresHumanos.size());
         List<AgenteInteligente> agentes = new ArrayList<>();
         for (int i = 1; i <= cantidadBots; i++) {

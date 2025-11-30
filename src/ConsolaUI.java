@@ -32,6 +32,33 @@ public class ConsolaUI implements InterfazJuego{
         }
         return  valor;
     }
+    public int pedirCantidadBots(int jugadoresHumanos) {
+        int maxBots = 23 - jugadoresHumanos;
+        if (jugadoresHumanos == 1) return leerEnteroEnRango("¿Cuántos bots van a jugar? (1 - " + maxBots + ")", 1, maxBots);
+        return leerEnteroEnRango("¿Cuántos bots van a jugar? (0 - " + maxBots + ")", 0, maxBots);
+    }
+    public List<String> pedirNombresJugadores() {
+        int nj = leerEnteroEnRango("¿Cuántos humanos van a jugar? (mínimo 1, máximo 23)", 1, 23);
+        List<String> nombres = new ArrayList<>();
+        for (int i = 1; i <= nj; i++){
+            String nom;
+            do {
+                System.out.println("Nombre del jugador " + i + ":");
+                nom = sc.nextLine().trim();
+                if (nom.isBlank()) {
+                    System.out.println("El nombre no puede estar vacio.");
+                } else {
+                    String finalNom = nom;
+                    if (nombres.stream().anyMatch(n -> n.equalsIgnoreCase(finalNom))){
+                        System.out.println("Ese nombre ya está en uso, elige otro.");
+                        nom = "";
+                    }
+                }
+            } while (nom.isBlank());
+            nombres.add((nom));
+        }
+        return nombres;
+    }
     public String leerLinea(Set<String> opcionesValidas) {
         String entrada;
         do {
@@ -65,33 +92,6 @@ public class ConsolaUI implements InterfazJuego{
             String ganadores = String.join(", ", r.ganadores().stream().map(Jugador::getNombre).toList());
             System.out.println("Ganadores del " + r.pozo() + " -> " + ganadores + " con " + r.mejorMano() + " (premio: " + r.premio() + ")");
         }
-    }
-    public int pedirCantidadBots(int jugadoresHumanos) {
-        int maxBots = 23 - jugadoresHumanos;
-        if (jugadoresHumanos == 1) return leerEnteroEnRango("¿Cuántos bots van a jugar? (1 - " + maxBots + ")", 1, maxBots);
-        return leerEnteroEnRango("¿Cuántos bots van a jugar? (0 - " + maxBots + ")", 0, maxBots);
-    }
-    public List<String> pedirNombresJugadores() {
-        int nj = leerEnteroEnRango("¿Cuántos humanos van a jugar? (mínimo 1, máximo 23)", 1, 23);
-        List<String> nombres = new ArrayList<>();
-        for (int i = 1; i <= nj; i++){
-            String nom;
-            do {
-                System.out.println("Nombre del jugador " + i + ":");
-                nom = sc.nextLine().trim();
-                if (nom.isBlank()) {
-                    System.out.println("El nombre no puede estar vacio.");
-                } else {
-                    String finalNom = nom;
-                    if (nombres.stream().anyMatch(n -> n.equalsIgnoreCase(finalNom))){
-                        System.out.println("Ese nombre ya está en uso, elige otro.");
-                        nom = "";
-                    }
-                }
-            } while (nom.isBlank());
-            nombres.add((nom));
-        }
-        return nombres;
     }
     @Override
     public void mostrarAccion(String mensaje) { System.out.println(mensaje); }

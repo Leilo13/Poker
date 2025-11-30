@@ -5,6 +5,10 @@ public class Baraja {
     public Baraja(){
         reiniciar();
     }
+    public Carta repartir() {
+        if (cartas.isEmpty()) throw new IllegalStateException("La baraja está vacía, no se pueden repartir más cartas.");
+        return cartas.removeLast();
+    }
     private void barajar() {
         if (cartas.isEmpty() || cartas.size() == 1) return;
         int n = cartas.size();
@@ -23,9 +27,5 @@ public class Baraja {
             }
         }
         barajar();
-    }
-    public Carta repartir() {
-        if (cartas.isEmpty()) throw new IllegalStateException("La baraja está vacía, no se pueden repartir más cartas.");
-        return cartas.removeLast();
     }
 }

@@ -1,13 +1,8 @@
 import java.util.*;
 public class AgenteInteligente implements InterfazJuego {
-    private final String nombre;
     private final Random rng = new Random();
+    private final String nombre;
     public AgenteInteligente(String nombre) { this.nombre = nombre; }
-    private Movimiento accionPorDefecto(List<Accion> opciones) {
-        if (opciones.contains(Accion.CALL)) return new Movimiento(Accion.CALL, 0);
-        if (opciones.contains(Accion.CHECK)) return new Movimiento(Accion.CHECK, 0);
-        return new Movimiento(Accion.FOLD, 0);
-    }
     private CategoriaPreflop clasificarManoPreflop(List<Carta> mano) {
         Carta c1 = mano.get(0);
         Carta c2 = mano.get(1);
@@ -29,12 +24,24 @@ public class AgenteInteligente implements InterfazJuego {
         if (gap == 1 && !suited && v1 >= Valor.NUEVE.valor() && v2 >= Valor.NUEVE.valor()) return CategoriaPreflop.MALA;
         return CategoriaPreflop.PESIMA;
     }
+    public List<String> pedirNombresJugadores() {
+        return List.of(nombre);
+    }
+    private Movimiento accionPorDefecto(List<Accion> opciones) {
+        if (opciones.contains(Accion.CALL)) return new Movimiento(Accion.CALL, 0);
+        if (opciones.contains(Accion.CHECK)) return new Movimiento(Accion.CHECK, 0);
+        return new Movimiento(Accion.FOLD, 0);
+    }
     private Movimiento decidirPreflop(Mesa mesa, Jugador j, List<Accion> opciones) {
         CategoriaPreflop categoria = clasificarManoPreflop(j.getMano());
         return switch (categoria) {
             case DELUXE -> {
                 if (opciones.contains(Accion.RAISE)) {
                     int cantidad = mesa.getApuestaActual() + mesa.getBigBlind() * (rng.nextBoolean() ? 2 : 3);
+                    int maxRaiseTo = j.getFichas() + j.getApuestaEnRonda();
+                    if (cantidad > maxRaiseTo) {
+                        cantidad = maxRaiseTo;
+                    }
                     yield new Movimiento(Accion.RAISE, cantidad);
                 } else if (opciones.contains(Accion.ALL_IN) && rng.nextDouble() < 0.2) {
                     yield new Movimiento(Accion.ALL_IN, 0);
@@ -44,14 +51,24 @@ public class AgenteInteligente implements InterfazJuego {
             }
             case FUERTE -> {
                 if (opciones.contains(Accion.RAISE) && rng.nextDouble() < 0.5) {
-                    yield new Movimiento(Accion.RAISE, mesa.getApuestaActual() + mesa.getBigBlind());
+                    int cantidad = mesa.getApuestaActual() + mesa.getBigBlind();
+                    int maxRaiseTo = j.getFichas() + j.getApuestaEnRonda();
+                    if (cantidad > maxRaiseTo) {
+                        cantidad = maxRaiseTo;
+                    }
+                    yield new Movimiento(Accion.RAISE, cantidad);
                 } else {
                     yield accionPorDefecto(opciones);
                 }
             }
             case DECENTE -> {
                 if (opciones.contains(Accion.RAISE) && rng.nextDouble() < 0.3) {
-                    yield new Movimiento(Accion.RAISE, mesa.getApuestaActual() + mesa.getBigBlind());
+                    int cantidad = mesa.getApuestaActual() + mesa.getBigBlind();
+                    int maxRaiseTo = j.getFichas() + j.getApuestaEnRonda();
+                    if (cantidad > maxRaiseTo) {
+                        cantidad = maxRaiseTo;
+                    }
+                    yield new Movimiento(Accion.RAISE, cantidad);
                 } else {
                     yield accionPorDefecto(opciones);
                 }
@@ -76,13 +93,6 @@ public class AgenteInteligente implements InterfazJuego {
             }
         };
     }
-    public List<String> pedirNombresJugadores() {
-        return List.of(nombre);
-    }
-    @Override
-    public void mostrarAccion(String mensaje) {
-        System.out.println("[Agente] " + mensaje);
-    }
     @Override
     public Movimiento pedirMovimiento(Mesa mesa, Jugador j) {
         List<Accion> opciones = mesa.operacionesDisponibles(j);
@@ -99,6 +109,10 @@ public class AgenteInteligente implements InterfazJuego {
                     int cantidad = mesa.getApuestaActual() == 0
                             ? mesa.getBigBlind() * (rng.nextBoolean() ? 2 : 3)
                             : mesa.getApuestaActual() + mesa.getBigBlind();
+                    int maxRaiseTo = j.getFichas() + j.getApuestaEnRonda();
+                    if (cantidad > maxRaiseTo) {
+                        cantidad = maxRaiseTo;
+                    }
                     yield new Movimiento(Accion.RAISE, cantidad);
                 } else {
                     yield accionPorDefecto(opciones);
@@ -106,7 +120,12 @@ public class AgenteInteligente implements InterfazJuego {
             }
             case ESCALERA, TERCIA, DOS_PARES -> {
                 if (jugadoresActivos <= 2 && opciones.contains(Accion.RAISE) && pozo > mesa.getBigBlind() * 4 && rng.nextDouble() < 0.3) {
-                    yield new Movimiento(Accion.RAISE, mesa.getApuestaActual() + mesa.getBigBlind());
+                    int cantidad = mesa.getApuestaActual() + mesa.getBigBlind();
+                    int maxRaiseTo = j.getFichas() + j.getApuestaEnRonda();
+                    if (cantidad > maxRaiseTo) {
+                        cantidad = maxRaiseTo;
+                    }
+                    yield new Movimiento(Accion.RAISE, cantidad);
                 } else {
                     yield accionPorDefecto(opciones);
                 }
@@ -120,4 +139,9 @@ public class AgenteInteligente implements InterfazJuego {
             }
         };
     }
+    @Override
+    public void mostrarAccion(String mensaje) {
+        System.out.println("[Agente] " + mensaje);
+    }
+
 }

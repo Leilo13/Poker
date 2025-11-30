@@ -1,12 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
 public class Jugador {
-    private final String nombre;
+    private boolean enRonda;
+    private boolean allIn;
     private int fichas;
     private int apuestaEnRonda;
     private final List<Carta> mano;
-    private boolean enRonda;
-    private boolean allIn;
+    private final String nombre;
     public Jugador(String nombre) {
         this.nombre = nombre;
         this.fichas = 500;
@@ -15,6 +15,18 @@ public class Jugador {
         this.allIn = false;
         this.apuestaEnRonda = 0;
     }
+    public boolean isAllIn() { return allIn; }
+    public boolean isEnRonda() { return enRonda; }
+    public int getApuestaEnRonda() { return apuestaEnRonda; }
+    public int getFichas() { return fichas; }
+    public int pagarBlind(int cantidad) {
+        int pagado = Math.min(cantidad, fichas);
+        fichas -= pagado;
+        apuestaEnRonda += pagado;
+        if (fichas == 0) allIn = true;
+        return pagado;
+    }
+    public List<Carta> getMano() { return List.copyOf(mano); }
     public String allIn() {
         if (fichas > 0) {
             apuestaEnRonda += fichas;
@@ -41,20 +53,7 @@ public class Jugador {
         enRonda=false;
         return nombre + " se retira.";
     }
-    public void ganarFichas(int cantidad) { fichas += cantidad; }
-    public int getApuestaEnRonda() { return apuestaEnRonda; }
-    public int getFichas() { return fichas; }
-    public List<Carta> getMano() { return List.copyOf(mano); }
     public String getNombre() { return nombre; }
-    public boolean isAllIn() { return allIn; }
-    public boolean isEnRonda() { return enRonda; }
-    public int pagarBlind(int cantidad) {
-        int pagado = Math.min(cantidad, fichas);
-        fichas -= pagado;
-        apuestaEnRonda += pagado;
-        if (fichas == 0) allIn = true;
-        return pagado;
-    }
     public String raise(int nuevaApuesta) {
         int diff = nuevaApuesta - apuestaEnRonda;
         if (diff > fichas) return nombre + " no tiene suficientes fichas para subir";
@@ -67,6 +66,7 @@ public class Jugador {
             return nombre + " sube a " + nuevaApuesta;
         }
     }
+    public void ganarFichas(int cantidad) { fichas += cantidad; }
     public void recibir(Carta c) { mano.add(c); }
     public void resetJugador(){
         apuestaEnRonda = 0;

@@ -1,8 +1,54 @@
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 public final class Juez {
-    private  Juez() {}
+    private static boolean esColor(int[] conteoPalo) {
+        for (int count : conteoPalo) if (count == 5) return true;
+        return false;
+    }
+    public static int compararResultados(ResultadoMano a, ResultadoMano b) {
+        int cmpTipo = Integer.compare(a.tipo().peso(),b.tipo().peso());
+        if (cmpTipo != 0) return cmpTipo;
+        List<Integer> da = a.desempate();
+        List<Integer> db = b.desempate();
+        int len = Math.min(da.size(), db.size());
+        for (int i = 0; i < len; i++){
+            int cmp = Integer.compare(da.get(i),db.get(i));
+            if (cmp != 0) return cmp;
+        }
+        return Integer.compare(da.size(), db.size());
+    }
+    private static int mapPalo(Mazo m) {
+        return switch (m) {
+            case TREBOLES -> 0;
+            case CORAZONES -> 1;
+            case PICAS -> 2;
+            case DIAMANTES -> 3;
+        };
+    }
+    private static int primerKicker(List<Integer> valoresDesc, List<Integer> excluidos) {
+        for (int v : valoresDesc) if (!excluidos.contains(v)) return v;
+        return 0;
+    }
+    private static Integer valorEscalera(List<Integer> valoresDesc, int[] conteoValor) {
+        List<Integer> uniq = new ArrayList<>();
+        Integer prev = null;
+        for (Integer v : valoresDesc) {
+            if (!v.equals(prev)) {
+                uniq.add(v);
+                prev = v;
+            }
+        }
+        for (int i = 0; i + 4 < uniq.size(); i++) {
+            int a = uniq.get(i);
+            if (uniq.get(i + 1) == a - 1 && uniq.get(i + 2) == a - 2 && uniq.get(i + 3) == a - 3 && uniq.get(i + 4) == a - 4) {
+                return a;
+            }
+        }
+        boolean as = conteoValor[14] > 0, dos = conteoValor[2] > 0, tres = conteoValor[3] > 0, cuatro = conteoValor[4] > 0, cinco = conteoValor[5] > 0;
+        if (as && dos && tres && cuatro && cinco) return 5;
+        return null;
+    }
     private static List<List<Carta>> combinar5(List<Carta> cartas) {
         List<List<Carta>> res = new ArrayList<>();
         int n = cartas.size();
@@ -21,21 +67,13 @@ public final class Juez {
                         }
         return res;
     }
-    public static int compararResultados(ResultadoMano a, ResultadoMano b) {
-        int cmpTipo = Integer.compare(a.tipo().peso(),b.tipo().peso());
-        if (cmpTipo != 0) return cmpTipo;
-        List<Integer> da = a.desempate();
-        List<Integer> db = b.desempate();
-        int len = Math.min(da.size(), db.size());
-        for (int i = 0; i < len; i++){
-            int cmp = Integer.compare(da.get(i),db.get(i));
-            if (cmp != 0) return cmp;
+    private static List<Integer> kickers(List<Integer> valoresDesc, List<Integer> excluidos, int cuantos) {
+        List<Integer> ks = new ArrayList<>();
+        for (int v : valoresDesc) {
+            if (excluidos.contains(v)) continue;
+            if (ks.size()<cuantos)ks.add(v);
         }
-        return Integer.compare(da.size(), db.size());
-    }
-    private static boolean esColor(int[] conteoPalo) {
-        for (int count : conteoPalo) if (count == 5) return true;
-        return false;
+        return ks;
     }
     private static ResultadoMano evaluar5(List<Carta> mano5) {
         int[] conteoValor = new int[15];
@@ -45,7 +83,7 @@ public final class Juez {
             int v = c.valor().valor();
             valores.add(v);
             conteoValor[v]++;
-            int p = mapPalo(c.mazo()); //Hacer este helper
+            int p = mapPalo(c.mazo());
             conteoPalo[p]++;
         }
         valores.sort(Comparator.reverseOrder());
@@ -69,7 +107,7 @@ public final class Juez {
             return new ResultadoMano(RankingMano.POKER, List.of(cuatroIguales, kicker), mano5);
         }
         if (tresIguales !=-1 && !pares.isEmpty()) {
-            return new ResultadoMano(RankingMano.FULL,List.of(tresIguales, pares.get(0)), mano5);
+            return new ResultadoMano(RankingMano.FULL,List.of(tresIguales, pares.getFirst()), mano5);
         }
         if (esColor) {
             return new ResultadoMano(RankingMano.COLOR, new ArrayList<>(valores), mano5);
@@ -90,9 +128,9 @@ public final class Juez {
             return new ResultadoMano(RankingMano.DOS_PARES,List.of(pares.get(0), pares.get(1),k), mano5);
         }
         if (pares.size() == 1) {
-            List<Integer> ks = kickers(valores, List.of(pares.get(0)),3);
+            List<Integer> ks = kickers(valores, List.of(pares.getFirst()),3);
             List<Integer> d = new ArrayList<>();
-            d.add(pares.get(0));
+            d.add(pares.getFirst());
             d.addAll(ks);
             return new ResultadoMano(RankingMano.PAR, d, mano5);
         }
@@ -110,44 +148,5 @@ public final class Juez {
             }
         }
         return mejor;
-    }
-    private static List<Integer> kickers(List<Integer> valoresDesc, List<Integer> excluidos, int cuantos) {
-        List<Integer> ks = new ArrayList<>();
-        for (int v : valoresDesc) {
-            if (excluidos.contains(v)) continue;
-            if (ks.size()<cuantos)ks.add(v);
-        }
-        return ks;
-    }
-    private static int mapPalo(Mazo m) {
-        return switch (m) {
-            case TREBOLES -> 0;
-            case CORAZONES -> 1;
-            case PICAS -> 2;
-            case DIAMANTES -> 3;
-        };
-    }
-    private static int primerKicker(List<Integer> valoresDesc, List<Integer> excluidos) {
-        for (int v:valoresDesc) if (!excluidos.contains(v)) return v;
-        return 0;
-    }
-    private static Integer valorEscalera(List<Integer> valoresDesc, int[] conteoValor) {
-        List<Integer> uniq = new ArrayList<>();
-        Integer prev = null;
-        for (Integer v : valoresDesc) {
-            if (!v.equals(prev)) {
-                uniq.add(v);
-                prev = v;
-            }
-        }
-        for (int i = 0; i + 4 < uniq.size(); i++) {
-            int a = uniq.get(i);
-            if (uniq.get(i + 1) == a - 1 && uniq.get(i + 2) == a - 2 && uniq.get(i + 3) == a - 3 && uniq.get(i + 4) == a - 4) {
-                return a;
-            }
-        }
-        boolean as = conteoValor[14] > 0, dos = conteoValor[2] > 0, tres = conteoValor[3] > 0, cuatro = conteoValor[4] > 0, cinco = conteoValor[5] > 0;
-        if (as && dos && tres && cuatro && cinco) return 5;
-        return null;
     }
 }

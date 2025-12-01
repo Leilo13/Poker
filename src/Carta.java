@@ -1,5 +1,5 @@
 // Una carta almacena el valor de su simbolo y el mazo al que pertenece
-public record Carta (Valor valor, Mazo mazo) {
+public record Carta (Valor valor, Mazo mazo){
     @Override
     public String toString() {
         if (valor == null || mazo == null) return "[??]";

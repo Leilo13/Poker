@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Jugador {
     private final String nombre;
     private int fichas;
     private int apuestaEnRonda;

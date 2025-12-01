@@ -61,6 +61,7 @@ public class Main {
         }
         System.out.println("Gracias por jugar.");
     }
+
     private static boolean mostrarSiHayResultado(ConsolaUI consola, ResultadoApuesta resultado) {
         if (resultado != null) {
             String ganadores = resultado.ganadores().stream().map(Jugador::getNombre).reduce((a, b) -> a + ", " + b).orElse("");

@@ -1,4 +1,5 @@
 import java.util.List;
+// Guarda los ganadores, con qué mano gana y la cantidad a recibir
 public record ResultadoShowdown (
         Pozo pozo,
         List<Jugador> ganadores,

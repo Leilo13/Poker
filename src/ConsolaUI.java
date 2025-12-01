@@ -1,7 +1,7 @@
 import java.util.*;
-public class ConsolaUI implements InterfazJuego{
     private final Scanner sc = new Scanner(System.in);
 
+    // Lee si la accion es valida
     private Accion leerAccionValida(List<Accion> opciones) {
         Accion accion = null;
         while (accion == null) {
@@ -19,6 +19,7 @@ public class ConsolaUI implements InterfazJuego{
         return accion;
     }
 
+    // Entrada invalida
     private int leerEnteroEnRango(String mensaje, int min, int max) {
         int valor = -1;
         while (valor < min || valor > max) {
@@ -46,6 +47,7 @@ public class ConsolaUI implements InterfazJuego{
         return entrada;
     }
 
+    // Muestra el estado de la mesa
     public void mostrarEstadoMesa(EstadoMesa estado) {
         System.out.println("=== Ronda: " + estado.ronda() + " ===\nApuesta actual: " + estado.apuestaActual() + "----------------------------");
         for (EstadoJugador ej : estado.jugadores()) {
@@ -60,6 +62,7 @@ public class ConsolaUI implements InterfazJuego{
         System.out.println();
     }
 
+    // Muestra el resulado de las ciegas
     public void mostrarResultadoCiegas(ResultadoCiegas r) {
         System.out.println(r.smallBlindPlayer().getNombre() + " paga SB: " + r.smallBlindPagada());
         System.out.println(r.bigBlindPlayer().getNombre() + " paga BB: " + r.bigBlindPagada());

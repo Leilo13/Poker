@@ -1,7 +1,6 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Mesa {
     private int apuestaActual;
     private int dealerIndex = -1;
     private final int smallBlind = 10;
@@ -98,7 +97,8 @@ public class Mesa {
                 .mapToInt(Jugador::getApuestaEnRonda)
                 .sum();
         jugadores.forEach(j -> {
-            if (!j.isEnRonda()) j.setApuestaEnRonda(0);
+            if (!j.isEnRonda())
+                j.setApuestaEnRonda(0);
         });
         List<Jugador> conApuesta = jugadores.stream()
                 .filter(j -> j.getApuestaEnRonda() > 0)
@@ -214,13 +214,14 @@ public class Mesa {
     }
 
     public boolean partidaTerminada() { return jugadores.size() <= 1; }
+
     private void repartirComunitarias() {
         switch (ronda) {
             case FLOP -> { for (int i = 0; i < 3; i++) comunitarias.add(baraja.repartir()); }
             case TURN, RIVER -> comunitarias.add(baraja.repartir());
             default -> {}
         }
-    }
+    }   // Reparte las comunitarias por cada ronda
 
     private void repartoInicial() {
         for (Jugador j : jugadores) {
@@ -242,8 +243,10 @@ public class Mesa {
     }
 
     public ResultadoApuesta rondaDeApuestas(Map<Jugador, InterfazJuego> interfaces) {
-        if (jugadores.stream().filter(Jugador::isEnRonda).allMatch(Jugador::isAllIn)) {
-            construirPozos();
+        if (jugadores.stream()
+                .filter(Jugador::isEnRonda)
+                .allMatch(Jugador::isAllIn)) {
+            construirPozos();   // En caso de que el maldito hijo de perra haga All-In
             return null;
         }
         int startIndex = calcularStartIndex();
@@ -252,7 +255,8 @@ public class Mesa {
         while (true) {
             for (int i = 0; i < jugadores.size(); i++) {
                 Jugador j = jugadores.get((startIndex + i) % jugadores.size());
-                if (!j.isEnRonda() || j.isAllIn()) continue;
+                if (!j.isEnRonda() || j.isAllIn())
+                    continue;
                 InterfazJuego ui = interfaces.get(j);
                 Movimiento mov = ui.pedirMovimiento(this, j);
                 int apuestaAntes = apuestaActual;
@@ -264,8 +268,10 @@ public class Mesa {
                     actuo = inicalizarMapaActuacion();
                     actuo.put(j, true);
                 }
-                if (condicionesDeCierre(huboApuesta, actuo)) return null;
-                if (soloQuedaUnJugador()) return resolverGanadorPorFold();
+                if (condicionesDeCierre(huboApuesta, actuo))
+                    return null;
+                if (soloQuedaUnJugador())
+                    return resolverGanadorPorFold();
             }
         }
     }
@@ -299,8 +305,13 @@ public class Mesa {
     }
 
     private boolean soloQuedaUnJugador() {
-        return jugadores.stream().filter(Jugador::isEnRonda).count() == 1;
+        return jugadores.stream()
+                .filter(Jugador::isEnRonda)
+                .count() == 1;
     }
 
-    private boolean todosActuaron(Map<Jugador, Boolean> yaActuo) { return jugadores.stream().filter(Jugador::isEnRonda).allMatch(j -> j.isAllIn() || yaActuo.getOrDefault(j, false)); }
+    private boolean todosActuaron(Map<Jugador, Boolean> yaActuo) {
+        return jugadores.stream()
+                .filter(Jugador::isEnRonda)
+                .allMatch(j -> j.isAllIn() || yaActuo.getOrDefault(j, false)); }
 }

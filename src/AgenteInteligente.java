@@ -3,16 +3,19 @@ import java.util.*;
 // Neta
 public class AgenteInteligente implements InterfazJuego {
     private final String nombre;
-    private final Random rng = new Random();
+    private final Random rng = new Random();    // Dios
 
     public AgenteInteligente(String nombre) { this.nombre = nombre; }
 
     private Movimiento accionPorDefecto(List<Accion> opciones) {
-        if (opciones.contains(Accion.CALL)) return new Movimiento(Accion.CALL, 0);
-        if (opciones.contains(Accion.CHECK)) return new Movimiento(Accion.CHECK, 0);
+        if (opciones.contains(Accion.CALL))
+            return new Movimiento(Accion.CALL, 0);
+        if (opciones.contains(Accion.CHECK))
+            return new Movimiento(Accion.CHECK, 0);
         return new Movimiento(Accion.FOLD, 0);
     }
 
+    // Neta evalua la categoría de su mano en Preflop
     private CategoriaPreflop clasificarManoPreflop(List<Carta> mano) {
         Carta c1 = mano.get(0);
         Carta c2 = mano.get(1);
@@ -21,20 +24,31 @@ public class AgenteInteligente implements InterfazJuego {
         boolean par = (c1.valor() == c2.valor());
         boolean suited = (c1.mazo() == c2.mazo());
         int gap = Math.abs(v1 - v2);
-        if (par && v1 >= Valor.JOTA.valor()) return CategoriaPreflop.DELUXE;
-        if (suited && ((c1.valor() == Valor.AS && (c2.valor() == Valor.REY || c2.valor() == Valor.REINA)) || (c2.valor() == Valor.AS && (c1.valor() == Valor.REY || c1.valor() == Valor.REINA)))) return CategoriaPreflop.DELUXE;
+        if (par && v1 >= Valor.JOTA.valor())
+            return CategoriaPreflop.DELUXE;
+        if (suited && ((c1.valor() == Valor.AS && (c2.valor() == Valor.REY || c2.valor() == Valor.REINA)) || (c2.valor() == Valor.AS && (c1.valor() == Valor.REY || c1.valor() == Valor.REINA))))
+            return CategoriaPreflop.DELUXE;
         if (par && v1 >= Valor.OCHO.valor()) return CategoriaPreflop.FUERTE;
-        if ((c1.valor() == Valor.AS && c2.valor() == Valor.REY) || (c1.valor() == Valor.REY && c2.valor() == Valor.AS)) return CategoriaPreflop.FUERTE;
-        if ((c1.valor() == Valor.AS && c2.valor() == Valor.REINA) || (c1.valor() == Valor.REINA && c2.valor() == Valor.AS)) return CategoriaPreflop.FUERTE;
-        if (suited && ((c1.valor() == Valor.AS && c2.valor() == Valor.JOTA) || (c2.valor() == Valor.AS && c1.valor() == Valor.JOTA))) return CategoriaPreflop.FUERTE;
-        if (suited && ((c1.valor() == Valor.REY && c2.valor() == Valor.REINA) || (c2.valor() == Valor.REY && c1.valor() == Valor.REINA))) return  CategoriaPreflop.FUERTE;
-        if (par) return CategoriaPreflop.DECENTE;
-        if (suited && gap == 1 && (v1 >= Valor.SIETE.valor() || v2 >= Valor.SIETE.valor())) return CategoriaPreflop.DECENTE;
-        if (suited && (c1.valor() == Valor.AS || c2.valor() == Valor.AS)) return CategoriaPreflop.DECENTE;
-        if (gap == 1 && !suited && v1 >= Valor.NUEVE.valor() && v2 >= Valor.NUEVE.valor()) return CategoriaPreflop.MALA;
+        if ((c1.valor() == Valor.AS && c2.valor() == Valor.REY) || (c1.valor() == Valor.REY && c2.valor() == Valor.AS))
+            return CategoriaPreflop.FUERTE;
+        if ((c1.valor() == Valor.AS && c2.valor() == Valor.REINA) || (c1.valor() == Valor.REINA && c2.valor() == Valor.AS))
+            return CategoriaPreflop.FUERTE;
+        if (suited && ((c1.valor() == Valor.AS && c2.valor() == Valor.JOTA) || (c2.valor() == Valor.AS && c1.valor() == Valor.JOTA)))
+            return CategoriaPreflop.FUERTE;
+        if (suited && ((c1.valor() == Valor.REY && c2.valor() == Valor.REINA) || (c2.valor() == Valor.REY && c1.valor() == Valor.REINA)))
+            return  CategoriaPreflop.FUERTE;
+        if (par)
+            return CategoriaPreflop.DECENTE;
+        if (suited && gap == 1 && (v1 >= Valor.SIETE.valor() || v2 >= Valor.SIETE.valor()))
+            return CategoriaPreflop.DECENTE;
+        if (suited && (c1.valor() == Valor.AS || c2.valor() == Valor.AS))
+            return CategoriaPreflop.DECENTE;
+        if (gap == 1 && !suited && v1 >= Valor.NUEVE.valor() && v2 >= Valor.NUEVE.valor())
+            return CategoriaPreflop.MALA;
         return CategoriaPreflop.PESIMA;
     }
 
+    // Neta decide que hacer en caso de cada caso
     private Movimiento decidirPreflop(Mesa mesa, Jugador j, List<Accion> opciones) {
         CategoriaPreflop categoria = clasificarManoPreflop(j.getMano());
         return switch (categoria) {
@@ -42,10 +56,13 @@ public class AgenteInteligente implements InterfazJuego {
                 if (opciones.contains(Accion.RAISE)) {
                     int cantidad = mesa.getApuestaActual() + mesa.getBigBlind() * (rng.nextBoolean() ? 2 : 3);
                     yield new Movimiento(Accion.RAISE, cantidad);
-                } else if (opciones.contains(Accion.ALL_IN) && rng.nextDouble() < 0.2) {
-                    yield new Movimiento(Accion.ALL_IN, 0);
-                } else {
-                    yield accionPorDefecto(opciones);
+                }
+                else
+                    if (opciones.contains(Accion.ALL_IN) && rng.nextDouble() < 0.2) {
+                        yield new Movimiento(Accion.ALL_IN, 0);
+                    }
+                    else {
+                        yield accionPorDefecto(opciones);
                 }
             }
             case FUERTE -> {
@@ -65,19 +82,25 @@ public class AgenteInteligente implements InterfazJuego {
             case MALA -> {
                 if (opciones.contains(Accion.CALL) && rng.nextDouble() < 0.2) {
                     yield new Movimiento(Accion.CALL, 0);
-                } else if (opciones.contains(Accion.CHECK)){
-                    yield new Movimiento(Accion.CHECK, 0);
-                } else {
-                    yield new Movimiento(Accion.FOLD, 0);
+                }
+                else
+                    if (opciones.contains(Accion.CHECK)){
+                        yield new Movimiento(Accion.CHECK, 0);
+                    }
+                    else {
+                        yield new Movimiento(Accion.FOLD, 0);
                 }
             }
             default -> {
                 if (opciones.contains(Accion.CALL) && rng.nextDouble() < 0.05) {
                     yield new Movimiento(Accion.CALL, 0);
-                } else if (opciones.contains(Accion.CHECK)){
-                    yield new Movimiento(Accion.CHECK, 0);
-                } else {
-                    yield new Movimiento(Accion.FOLD, 0);
+                }
+                else
+                    if (opciones.contains(Accion.CHECK)){
+                        yield new Movimiento(Accion.CHECK, 0);
+                    }
+                    else {
+                        yield new Movimiento(Accion.FOLD, 0);
                 }
             }
         };
@@ -92,10 +115,12 @@ public class AgenteInteligente implements InterfazJuego {
         System.out.println("[Agente] " + mensaje);
     }
 
+    // Pide el movimiento del bot
     @Override
     public Movimiento pedirMovimiento(Mesa mesa, Jugador j) {
         List<Accion> opciones = mesa.operacionesDisponibles(j);
-        if (mesa.getRonda() == Ronda.PREFLOP) return decidirPreflop(mesa, j, opciones);
+        if (mesa.getRonda() == Ronda.PREFLOP)
+            return decidirPreflop(mesa, j, opciones);
         ResultadoMano mejorMano = Juez.evaluarMejorMano(j.getMano(), mesa.getComunitarias());
         int jugadoresActivos = (int) mesa.getJugadores().stream()
                 .filter(Jugador::isEnRonda)
@@ -104,28 +129,37 @@ public class AgenteInteligente implements InterfazJuego {
         int stack = j.getFichas();
         return switch (mejorMano.tipo()) {
             case FLOR, POKER, FULL, COLOR -> {
-                if (opciones.contains(Accion.ALL_IN) && (stack < pozo / 2 || rng.nextDouble() < 0.2)) {
+                if (opciones.contains(Accion.ALL_IN)
+                        && (stack < pozo / 2 || rng.nextDouble() < 0.2)) {
                     yield new Movimiento(Accion.ALL_IN, 0);
-                } else if (opciones.contains(Accion.RAISE)) {
-                    int cantidad = mesa.getApuestaActual() == 0
+                }
+                else
+                    if (opciones.contains(Accion.RAISE)) {
+                        int cantidad = mesa.getApuestaActual() == 0
                             ? mesa.getBigBlind() * (rng.nextBoolean() ? 2 : 3)
                             : mesa.getApuestaActual() + mesa.getBigBlind();
-                    yield new Movimiento(Accion.RAISE, cantidad);
-                } else {
+                        yield new Movimiento(Accion.RAISE, cantidad);
+                }
+                else {
                     yield accionPorDefecto(opciones);
                 }
             }
             case ESCALERA, TERCIA, DOS_PARES -> {
-                if (jugadoresActivos <= 2 && opciones.contains(Accion.RAISE) && pozo > mesa.getBigBlind() * 4 && rng.nextDouble() < 0.3) {
+                if (jugadoresActivos <= 2
+                        && opciones.contains(Accion.RAISE)
+                        && pozo > mesa.getBigBlind() * 4
+                        && rng.nextDouble() < 0.3) {
                     yield new Movimiento(Accion.RAISE, mesa.getApuestaActual() + mesa.getBigBlind());
-                } else {
+                }
+                else {
                     yield accionPorDefecto(opciones);
                 }
             }
             default -> {
                 if (opciones.contains(Accion.CHECK)) {
                     yield new Movimiento(Accion.CHECK, 0);
-                } else {
+                }
+                else {
                     yield new Movimiento(Accion.FOLD, 0);
                 }
             }

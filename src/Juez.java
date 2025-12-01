@@ -4,7 +4,6 @@ import java.util.List;
 
 // Hay un método por CADA juego ganador
 // Clase final porque es unica en su tipo, no se puede heredar
-public final class Juez {
     private Juez() {}
 
 

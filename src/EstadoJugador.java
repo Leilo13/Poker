@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.stream.Collectors;
+// Solo guarda el estado del jugador
 public record EstadoJugador(
     String nombre,
     int fichas,
